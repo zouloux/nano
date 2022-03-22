@@ -1,0 +1,168 @@
+
+/* DEBUG BAR */
+.DebugBar {
+	position: fixed;
+	bottom: -1px;
+	right: -1px;
+	background-color: rgba(0, 0, 0, .6);
+	z-index: 99999999;
+	border: 1px solid rgba(255, 255, 255, .5);
+	width: 30px;
+	height: 30px;
+	border-radius: 10px 0 0 0;
+	overflow: hidden;
+	backdrop-filter: blur(10px);
+}
+/*.DebugBar * {*/
+/*	padding: 0;*/
+/*	margin: 0;*/
+/*	box-sizing: border-box;*/
+/*}*/
+/* Hide on mobile */
+@media (max-width: 500px) {
+	.DebugBar {
+		display: none !important;
+	}
+}
+.DebugBar:hover,
+.DebugBar-locked,
+.DebugBar-resizing {
+	border-radius: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	min-height: 50px;
+	max-height: 80vh;
+	width: auto;
+	height: auto;
+	border: none;
+	/*border-top: 1px solid rgba(255, 255, 255, .8);*/
+}
+.DebugBar_tabs,
+.DebugBar_contents {
+	visibility: hidden;
+}
+.DebugBar-locked .DebugBar_tabs,
+.DebugBar-locked .DebugBar_contents,
+.DebugBar-resizing .DebugBar_tabs,
+.DebugBar-resizing .DebugBar_contents,
+.DebugBar:hover .DebugBar_tabs,
+.DebugBar:hover .DebugBar_contents {
+	visibility: visible;
+}
+
+/* TABS & CONTENTS */
+.DebugBar_tabs {
+	display: flex;
+	padding: 4px;
+}
+.DebugBar_tabButton {
+	padding: 4px 8px;
+	cursor: pointer;
+	height: 30px;
+	border: none;
+	color: white;
+	margin-right: 8px;
+	background: transparent;
+	border-radius: 4px 4px 0 0;
+}
+.DebugBar_tabButton.selected {
+	background: white;
+	color: black;
+}
+.DebugBar_contents {
+	height: calc( 100% - 30px );
+	border-top: 1px solid rgba(255, 255, 255, 1);
+	margin-top: -4px;
+}
+.DebugBar_tabContent {
+	display: none;
+	overflow: scroll;
+	overflow-scrolling: touch;
+	-webkit-overflow-scrolling: touch;
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+.DebugBar_tabContent::-webkit-scrollbar {
+	 width: 0 !important;
+	 height: 0 !important;
+}
+.DebugBar_tabContent.selected {
+	display: block;
+}
+
+/* LOCK & RESIZE BUTTONS */
+.DebugBar_lockButton {
+	position: absolute;
+	top: 2px;
+	right: 5px;
+	padding: 2px;
+	width: 30px;
+	height: 30px;
+	cursor: pointer;
+	font-size: 16px;
+	background: transparent;
+	border: 0;
+}
+.DebugBar_lockButton:after {
+	content: "🔓";
+	display: block;
+}
+.DebugBar-locked .DebugBar_lockButton:after {
+	content: "🔒";
+}
+.DebugBar_resizeButton {
+	position: absolute;
+	top: 4px;
+	right: 40px;
+	padding: 2px;
+	cursor: grab;
+	color: white;
+	background: none;
+	border: none;
+	font-size: 20px;
+}
+
+/* DUMP STYLES */
+.DebugBar_dumpTitle {
+	font-family: "Courier New", sans-serif;
+	font-weight: normal;
+	font-size: 15px;
+	color: white;
+	margin-top: 10px;
+	padding: 3px 6px;
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100%;
+	white-space: nowrap;
+}
+.DebugBar_dumpTitle span {
+	opacity: .5;
+}
+.DebugBar .sf-dump {
+	background: transparent;
+}
+
+
+/* PROFILE BARS */
+.DebugBar_profiling {
+	max-width: 100%;
+	overflow: hidden;
+}
+.DebugBar_profileBar {
+	position: relative;
+	font-family: "Courier New", sans-serif;
+	background-color: white;
+	padding: 6px;
+	font-size: 14px;
+	box-sizing: border-box;
+	margin-bottom: 1px;
+	color: black;
+	white-space: nowrap;
+}
+.DebugBar_profileBar-right {
+	display: flex;
+	justify-content: right;
+}
+

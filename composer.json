@@ -1,0 +1,27 @@
+{
+	"name": "zouloux/nano",
+	"description": "Nanoscopic PHP Framework.",
+	"license": "MIT",
+	"type": "framework",
+	"version": "1.0.0",
+	"keywords": [
+		"framework",
+		"php",
+		"controller",
+		"view",
+		"routing"
+	],
+	"authors": [
+		{
+			"name": "Alexis Bouhet"
+		}
+	],
+	"require": {
+		"php": "^8.0",
+		"cocur/slugify": "^v4.1.0",
+		"colinodell/json5": "^v2.2.2",
+		"m1/env": "^2.2.0",
+		"symfony/var-dumper": "v6.0.6",
+		"pecee/simple-router": "^4.3.7.2"
+	}
+}
