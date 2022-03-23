@@ -64,6 +64,13 @@ class NanoDebug
 		self::$__profiles[ $name ][1] = microtime( true );
 	}
 
+	// ------------------------------------------------------------------------- ADD CUSTOM TAB
+
+	protected static array $__customTabs = [];
+	static function addCustomTab ( string $title, callable $profileHandler ) {
+		self::$__customTabs[] = [ $title, $profileHandler ];
+	}
+
 	// ------------------------------------------------------------------------- RENDER
 
 	protected static array $_dumps = [];
@@ -72,7 +79,7 @@ class NanoDebug
 
 	protected static VarCLoner $__cloner;
 
-	static protected function dumpToString ( mixed $data ) {
+	static function dumpToString ( mixed $data ) {
 		return NanoDebug::$__dumper->dump(NanoDebug::$__cloner->cloneVar($data), true);
 	}
 
@@ -107,8 +114,10 @@ class NanoDebug
 		$renderedHTML .= self::tabButton('Dumps');
 		if ( Nano::getEnv("NANO_PROFILE", false) )
 			$renderedHTML .= self::tabButton('Profiling');
-		//$renderedHTML .= self::tabButton('DB Requests'); // TODO
-		//$renderedHTML .= self::tabButton('Cache'); // TODO
+		// Add custom tab title
+		foreach ( self::$__customTabs as $customTab )
+			$renderedHTML .= self::tabButton( $customTab[0] );
+		// Resize and lock buttons
 		$renderedHTML .= self::tabButton('', 'lockButton');
 		$renderedHTML .= self::tabButton('↕️', 'resizeButton');
 		$renderedHTML .= "	</div>";
@@ -159,6 +168,9 @@ class NanoDebug
 			}
 			$renderedHTML .= self::tabContent($profileBuffer.'</div>');
 		}
+		// Add custom tab contents
+		foreach ( self::$__customTabs as $customTab )
+			$renderedHTML .= self::tabContent( $customTab[1]() );
 		// Close debug bar
 		$renderedHTML .= "</div>";
 		// Inject javascript as asynchronously
