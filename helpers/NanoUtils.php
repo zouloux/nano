@@ -88,7 +88,7 @@ class NanoUtils
 		// If we are on last element, set value
 		// Init value if not existing with correct type
 		if ( !isset($array[ $key ]) ) {
-			if ( is_numeric($value) )
+			if ( is_int($value) || is_float($value) )
 				$array[ $key ] = 0;
 			else if ( is_string($value) )
 				$array[ $key ] = "";

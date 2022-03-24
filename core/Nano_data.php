@@ -131,19 +131,35 @@ trait Nano_data {
 	/**
 	 * Load and inject app data from /app/data folder.
 	 * @param string $key Key to inject into. Handle dot notation.
-	 * @param string|null $filePathFromAppData File path relative to /app/data folder, without extension.
+	 * @param string|null $filePathFromAppDataWithoutExtension File path relative to /app/data folder, without extension.
+	 * @param string $extension Default extension is json, can be json5 or txt.
 	 * @param string $extension Default extension is json5.
 	 * @return void
 	 * @throws Exception
 	 */
-	static function loadAppData ( string $key, string $filePathFromAppData = null, string $extension = "json5" ) {
+	static function loadAppData ( string $key, string $filePathFromAppDataWithoutExtension = null, string $extension = "json", mixed $default = null ) {
+		if ( !in_array($extension, ["json5", "json", "txt"]) )
+			throw new Exception("Nano::loadAppData // Invalid extension $extension");
 		// Path is from key if not defined
-		if ( $filePathFromAppData == null )
-			$filePathFromAppData = $key;
+		if ( $filePathFromAppDataWithoutExtension == null )
+			$filePathFromAppDataWithoutExtension = $key;
 		// Absolute path to json file
-		$absolutePath = Nano::path(Nano::$__appDataDirectory, $filePathFromAppData, $extension);
-		// Load this file and throw errors
-		$data = Nano::readJSON5( $absolutePath );
+		$absolutePath = Nano::path(Nano::$__appDataDirectory, $filePathFromAppDataWithoutExtension, $extension);
+		// Load as raw text
+		if ( $extension == "txt" ) {
+			if ( !file_exists($absolutePath) ) {
+				if ( is_null($default) )
+					throw new Exception("Nano::loadAppData // File $filePathFromAppDataWithoutExtension not found.");
+				$data = $default;
+			}
+			else {
+				$data = file_get_contents( $absolutePath );
+			}
+		}
+		// Load as Json and throw errors
+		else if ( $extension == "json" || $extension == "json5" )
+			$data = Nano::readJSON5( $absolutePath );
+		// Inject
 		self::injectAppData( $key, $data );
 	}
 
