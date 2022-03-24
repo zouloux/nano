@@ -90,6 +90,10 @@
 .DebugBar_tabContent.selected {
 	display: block;
 }
+.DebugBar_tabContent h2 {
+	color: white;
+	padding-left: 6px;
+}
 
 /* LOCK & RESIZE BUTTONS */
 .DebugBar_lockButton {
