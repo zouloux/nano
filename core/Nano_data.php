@@ -144,6 +144,16 @@ trait Nano_data {
 		$absolutePath = Nano::path(Nano::$__appDataDirectory, $filePathFromAppData, $extension);
 		// Load this file and throw errors
 		$data = Nano::readJSON5( $absolutePath );
+		self::injectAppData( $key, $data );
+	}
+
+	/**
+	 * Inject app data.
+	 * @param string $key Key to inject into. Handle dot notation.
+	 * @param mixed $data
+	 * @return void
+	 */
+	static function injectAppData ( string $key, mixed $data ) {
 		// Inject data
 		NanoUtils::dotAdd( Nano::$__appData, $key, $data );
 	}
