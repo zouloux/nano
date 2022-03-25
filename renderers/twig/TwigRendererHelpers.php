@@ -63,8 +63,7 @@ class TwigRendererHelpers
 		$twig->addFunction(
 			new TwigFunction( 'data', function ( string $key = null, mixed $default = null ) {
 				$value = Nano::getAppData( $key ) ?? $default;
-				if ( is_array($value) ) return $value;
-				return $data;
+				return $value;
 			})
 		);
 		/**
