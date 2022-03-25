@@ -15,6 +15,7 @@ class TwigRenderer extends AbstractRenderer
 	protected Environment $_environment;
 
 	protected function init () {
+		// TODO : Add Nano core elements here
 		$this->_loader = new FilesystemLoader( $this->_templateRootPath );
 		$this->_environment = new Environment( $this->_loader );
 		TwigRendererHelpers::injectHelpers( $this->_environment );
@@ -50,11 +51,11 @@ class TwigRenderer extends AbstractRenderer
 		// Store theme variables for root template
 		$this->_themeVariables = $vars;
 		// Before render middleware
-		Nano::action("App", "beforeView", [$templateName, &$vars], false);
+		Nano::action("App", "beforeView", [$templateName, &$this->_themeVariables], false);
 		// Load template
 		$template = $this->_environment->load( $templateName.'.twig');
 		// Render with twig and filter it
-		$stream = $template->render( $vars );
+		$stream = $template->render( $this->_themeVariables );
 		return $this->filterCapturedStream( $stream );
 	}
 }

@@ -61,22 +61,20 @@ class TwigRendererHelpers
 		 * Data are injected with Nano::injectAppData();
 		 */
 		$twig->addFunction(
-			new TwigFunction( 'data', function ( string $key = null, mixed $default = null, int|bool $sanitize = false, array $templateVars = [] ) {
+			new TwigFunction( 'data', function ( string $key = null, mixed $default = null ) {
 				$value = Nano::getAppData( $key ) ?? $default;
 				if ( is_array($value) ) return $value;
-				// Sanitize only if needed. Will force null values to be "".
-				return ($sanitize || !empty($templateVars)) ? S( $value, $sanitize, $templateVars ) : $value;
+				return $data;
 			})
 		);
 		/**
 		 * Http path to a resource with base.
 		 * If $path is empty or null, base will be returned.
 		 * Base always finish with a slash.
-		 * Return path is sanitized.
 		 */
 		$twig->addFunction(
 			new TwigFunction( 'path', function ( string|null $path = "" ) {
-				return S( Nano::getBase().ltrim($path ?? "", "/") );
+				return Nano::getBase().ltrim($path ?? "", "/");
 			})
 		);
 		/**
