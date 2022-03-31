@@ -122,6 +122,12 @@ class TwigRendererHelpers
 		$twig->addTest(
 			new TwigTest('numeric', function ($value) { return is_numeric($value); })
 		);
+		// --------------------------------------------------------------------- STRING HELPERS
+		$twig->addFilter(
+			new TwigFilter( 'ucfirst', function ($string) {
+				return ucfirst( $string );
+			})
+		);
 		// --------------------------------------------------------------------- SPLIT TEXT
 		$twig->addFilter(
 			new TwigFilter( 'splitter', function ( $string, $type = 'br', $tag = 'span', $spanInSpan = false, $className = '', $insertBreaks = true ) {
