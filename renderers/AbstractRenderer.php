@@ -50,7 +50,10 @@ class AbstractRenderer
 	 * This will use NanoUtils::dotAdd.
 	 */
 	public function addThemeVariable ( string $key, mixed $value ) {
-		NanoUtils::dotAdd( $this->_themeVariables, $key, $value );
+		if ( is_numeric($value) || is_string($value) || is_array($value) )
+			NanoUtils::dotAdd( $this->_themeVariables, $key, $value );
+		else
+			NanoUtils::dotSet( $this->_themeVariables, $key, $value );
 	}
 
 	// ------------------------------------------------------------------------- RENDER
