@@ -70,7 +70,7 @@ class AbstractRenderer
 		if ( Nano::getEnv("NANO_MINIFY_OUTPUT") )
 			$stream = NanoUtils::minifyHTML( $stream );
 		// Call middleware and filter captured stream
-		$strema = Nano::action("App", "processRenderStream", [$stream], false) ?? $stream;
+		$stream = Nano::action("App", "processRenderStream", [$stream], false) ?? $stream;
 		// Inject debugger
 		$profiling();
 		if ( Nano::getEnv("NANO_DEBUG") && Nano::getEnv("NANO_DEBUG_BAR", true) )

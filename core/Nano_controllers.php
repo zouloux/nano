@@ -83,20 +83,20 @@ trait Nano_controllers {
 	 * @throws Exception
 	 */
 	static function action ( string $controllerName, string $actionName, array $arguments = [], bool $throw = true ):mixed {
-		$actionProfile = NanoDebug::profile("Action - $controllerName.$actionName");
+		$profiling = NanoDebug::profile("Action - $controllerName.$actionName");
 		// Get controller instance
 		$instance = Nano::getController( $controllerName, $throw );
 		// Check if method exists
 		if ( is_null($instance) || !method_exists($instance, $actionName) ) {
 			if ( !$throw ) {
-				$actionProfile();
+				$profiling( true );
 				return null;
 			}
 			throw new Exception("App::action // Action ${actionName} not found on controller ${controllerName}.");
 		}
 		// Call method and return result. Do not catch errors
 		$result = call_user_func_array( [ $instance, $actionName ], $arguments );
-		$actionProfile();
+		$profiling();
 		return $result;
 	}
 }

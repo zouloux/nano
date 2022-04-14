@@ -54,7 +54,12 @@ class NanoDebug
 		if ( !$forceProfiling && !Nano::getEnv("NANO_PROFILE", false) ) return function () {};
 		self::$__profiles[ $name ] = [ microtime( true ) ];
 		// Return the stop function to avoid having to repeat the $name
-		return function () use ( $name ) { self::profileStop( $name ); };
+		return function ( $discard = false ) use ( $name ) {
+			if ( $discard )
+				unset( self::$__profiles[ $name ] );
+			else
+				self::profileStop( $name );
+		};
 	}
 
 	static public function profileStop ( string $name ) {

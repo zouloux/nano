@@ -3,6 +3,7 @@
 namespace Nano\renderers\twig;
 
 use Nano\core\Nano;
+use Nano\debug\NanoDebug;
 use Nano\renderers\AbstractRenderer;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
@@ -53,9 +54,12 @@ class TwigRenderer extends AbstractRenderer
 		// Before render middleware
 		Nano::action("App", "beforeView", [$templateName, &$this->_themeVariables], false);
 		// Load template
+		$profiling = NanoDebug::profile("Rendering template $templateName");
 		$template = $this->_environment->load( $templateName.'.twig');
 		// Render with twig and filter it
 		$stream = $template->render( $this->_themeVariables );
-		return $this->filterCapturedStream( $stream );
+		$profiling();
+		$stream = $this->filterCapturedStream( $stream );
+		return $stream;
 	}
 }
