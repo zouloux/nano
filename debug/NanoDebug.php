@@ -135,7 +135,11 @@ class NanoDebug
 				'request' => $_REQUEST,
 				'server' => $_SERVER,
 				'session' => $_SESSION ?? [],
-				'constants' => get_defined_constants(1)
+				'constants' => (
+					Nano::getEnv('NANO_CONSTANTS', false)
+					? get_defined_constants(1)
+					: "Constants can be very expansive to show. Set env NANO_CONSTANTS=true to show them."
+				)
 			])
 		);
 		$renderedHTML .= self::tabContent( self::dumpToString(Nano::getAppData()) );
