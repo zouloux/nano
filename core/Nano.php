@@ -15,6 +15,7 @@ class Nano
 	// ------------------------------------------------------------------------- TRAITS
 
 	use Nano_base;
+	use Nano_cache;
 	use Nano_envs;
 	use Nano_data;
 	use Nano_routes;
