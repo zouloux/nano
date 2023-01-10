@@ -133,11 +133,11 @@ class TwigRendererHelpers
 			new TwigFilter( 'splitter', function ( $string, $type = 'br', $tag = 'span', $spanInSpan = false, $className = '', $insertBreaks = true ) {
 
 				function twigSplitter_renderSplitterPart ( $part, $tag, $className, $spanInSpan = false ) {
-					$output = "<${tag} class=\"${className}\">";
+					$output = "<$tag class=\"$className\">";
 					if ($spanInSpan) $output .= '<span>';
 					$output .= $part;
 					if ($spanInSpan) $output .= '</span>';
-					return $output."</${tag}>";
+					return $output."</$tag>";
 				}
 
 				$string = str_replace("\r\n", "\n", $string);
@@ -149,7 +149,7 @@ class TwigRendererHelpers
 				else if ( $type == 'nl' )
 					$lines = explode("\n", $string);
 				else
-					throw new \Exception("Invalid splitter type${type}.");
+					throw new \Exception("Invalid splitter type$type.");
 
 				$outputLines = [];
 				foreach ( $lines as $line ) {

@@ -92,7 +92,7 @@ trait Nano_controllers {
 				$profiling( true );
 				return null;
 			}
-			throw new Exception("App::action // Action ${actionName} not found on controller ${controllerName}.");
+			throw new Exception("App::action // Action $actionName not found on controller $controllerName.");
 		}
 		// Call method and return result. Do not catch errors
 		$result = call_user_func_array( [ $instance, $actionName ], $arguments );

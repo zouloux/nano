@@ -89,7 +89,7 @@ class NanoDebug
 	}
 
 	static protected function tabButton ($name, $class = 'tabButton'):string {
-		return "		<button class='DebugBar_${class}'>${name}</button>";
+		return "		<button class='DebugBar_$class'>$name</button>";
 	}
 	static protected function tabContent ($content):string {
 		return implode("\n", [
@@ -109,7 +109,7 @@ class NanoDebug
 		NanoDebug::$__cloner->addCasters( ReflectionCaster::UNSET_CLOSURE_FILE_INFO );
 		// Inject CSS before to avoid a layout shift
 		$base = Nano::getBase();
-		$renderedHTML = "<link rel='stylesheet' href='${base}assets/debug-bar.css' />";
+		$renderedHTML = "<link rel='stylesheet' href='{$base}assets/debug-bar.css' />";
 		// Init tab bar
 		$renderedHTML .= "<div class='DebugBar'>";
 		$renderedHTML .= "	<div class='DebugBar_tabs'>";
@@ -183,7 +183,7 @@ class NanoDebug
 		// Close debug bar
 		$renderedHTML .= "</div>";
 		// Inject javascript as asynchronously
-		$renderedHTML .= "<script src='${base}assets/debug-bar.js' async defer></script>";
+		$renderedHTML .= "<script src='{$base}assets/debug-bar.js' async defer></script>";
 		return $renderedHTML;
 	}
 }

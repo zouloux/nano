@@ -41,7 +41,7 @@ trait Nano_data {
 		// Check if this file exists
 		if ( !file_exists($absolutePath) ) {
 			if ( !$throw ) return null;
-			throw new Exception("Nano::readJson // File ${absolutePath} not found.");
+			throw new Exception("Nano::readJson // File $absolutePath not found.");
 		}
 		// Try to load and decode file (with json5)
 		try {
