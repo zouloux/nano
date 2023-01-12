@@ -13,25 +13,35 @@ trait Nano_cache {
 	}
 
 	static function cacheClear () {
+		if ( Nano::getEnv("NANO_DISABLE_CACHE", false) )
+			return 1;
 		return apcu_clear_cache();
 	}
 
 	static function cacheHas ( string $key ) {
+		if ( Nano::getEnv("NANO_DISABLE_CACHE", false) )
+			return false;
 		$key = self::$__cachePrefix.$key;
 		return apcu_exists( $key );
 	}
 
 	static function cacheGet ( string $key ) {
+		if ( Nano::getEnv("NANO_DISABLE_CACHE", false) )
+			return null;
 		$key = self::$__cachePrefix.$key;
 		return apcu_fetch( $key );
 	}
 
 	static function cacheSet ( string $key, mixed $result ) {
+		if ( Nano::getEnv("NANO_DISABLE_CACHE", false) )
+			return 1;
 		$key = self::$__cachePrefix.$key;
 		return apcu_store( $key, $result );
 	}
 
 	static function cacheDefine ( $key, $getHandler, $retrieveHandler = null ) {
+		if ( Nano::getEnv("NANO_DISABLE_CACHE", false) )
+			return $getHandler();
 		$key = self::$__cachePrefix.$key;
 		if ( apcu_exists( $key ) ) {
 			if ( !is_null($retrieveHandler) )
