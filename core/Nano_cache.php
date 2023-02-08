@@ -5,10 +5,10 @@ namespace Nano\core;
 trait Nano_cache {
 
 	// ------------------------------------------------------------------------- CACHE
-	// Implementation status : 5%
+	// Implementation status : 60%
 
 	protected static string $__cachePrefix = "_nano_";
-	static function cachePrefix ( $prefix ) {
+	static function setCachePrefix ( $prefix ) {
 		self::$__cachePrefix = $prefix;
 	}
 
