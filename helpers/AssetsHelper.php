@@ -50,9 +50,10 @@ class AssetsHelper
 				: rtrim($viteProxy, "/")."/"
 			);
 			// Set assets to proxy vite dev server
-			self::addScriptFile("header", $viteProxy.ltrim($assetsPath, "/")."@vite/client", true);
-			$viteMainStyle !== false && self::addStyleFile($styleLocation, $viteProxy.$viteMainStyle);
-			$viteMainScript !== false && self::addScriptFile($scriptLocation, $viteProxy.$viteMainScript, true, true);
+			$base = $viteProxy.ltrim($assetsPath, "/");
+			self::addScriptFile("header", $base."@vite/client", true);
+			$viteMainStyle !== false && self::addStyleFile($styleLocation, $base.$viteMainStyle);
+			$viteMainScript !== false && self::addScriptFile($scriptLocation, $base.$viteMainScript, true, true);
 		}
 		// Use vite built assets
 		else {
