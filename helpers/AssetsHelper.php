@@ -20,39 +20,19 @@ class AssetsHelper
 	];
 
 	/**
-	 * Manage vite assets automatically from .env config.
-	 * Will load cache busting version from data/version/version.txt.
-	 * Will get manifest and assets from "assets/" from base.
-	 * @return void
-	 * @throws Exception
-	 */
-	public static function viteAuto () {
-		// Get config from .env
-		$viteProxy = Nano::getEnv("NANO_VITE_PROXY", false);
-		$viteMainScript = Nano::getEnv("NANO_VITE_MAIN_SCRIPT", "index.ts");
-		$viteMainStyle = Nano::getEnv("NANO_VITE_MAIN_STYLE", "index.less");
-		$assetsPath = Nano::getBase()."assets/";
-		// Read cache buster version
-		Nano::loadAppData("version", "version", "txt", "0");
-		$cacheBuster = Nano::getAppData("version");
-		// Inject assets
-		AssetsHelper::injectViteAssets( $viteProxy, $viteMainScript, $viteMainStyle, $assetsPath, $cacheBuster );
-	}
-
-	/**
 	 * @param string|boolean $viteProxy Vite proxy URL. Default is "http://localhost:5173/" if true is given.
 	 * 									False will load generated built assets from file system.
-	 * @param string $viteMainScript Vite main script. Default is "index.ts"
-	 * @param string $viteMainStyle Vite main style. Default is "index.less"
+	 * @param string|false $viteMainScript Vite main script. False to disable.
+	 * @param string|false $viteMainStyle Vite main style. False to disable.
 	 * @param string $assetsPath Assets paths from base. Default is "assets/"
 	 * @param string $cacheBusterSuffix
 	 * @return void
 	 * @throws Exception
 	 */
-	public static function injectViteAssets (
+	public static function addViteAssets (
 		mixed $viteProxy,
-		string $viteMainScript = "index.ts",
-		string $viteMainStyle = "index.less",
+		mixed $viteMainScript,
+		mixed $viteMainStyle,
 		string $assetsPath = "assets/",
 		string $cacheBusterSuffix = ""
 	) {
@@ -60,14 +40,14 @@ class AssetsHelper
 		if ( $viteProxy ) {
 			// Get default vite proxy
 			$viteProxy = (
-			( $viteProxy === true || strtolower($viteProxy) == "true" || $viteProxy == "1" )
+				( $viteProxy === true || strtolower($viteProxy) == "true" || $viteProxy == "1" )
 				? "http://localhost:5173/"
 				: rtrim($viteProxy, "/")."/"
 			);
 			// Set assets to proxy vite dev server
-			self::addScriptFile("header", $viteProxy."assets/@vite/client", true);
-			self::addStyleFile("header", $viteProxy.$viteMainStyle);
-			self::addScriptFile("footer", $viteProxy.$viteMainScript, true);
+			self::addScriptFile("header", $viteProxy.$assetsPath."@vite/client", true);
+			$viteMainStyle !== false && self::addStyleFile("header", $viteProxy.$viteMainStyle);
+			$viteMainScript !== false && self::addScriptFile("footer", $viteProxy.$viteMainScript, true);
 		}
 		// Use vite built assets
 		else {
@@ -77,8 +57,8 @@ class AssetsHelper
 			if ( is_null($manifest) )
 				return;
 			// Add entry points
-			self::addStyleFile("header", $assetsPath.$manifest[$viteMainStyle]["file"]."?".$cacheBusterSuffix);
-			self::addScriptFile("footer", $assetsPath.$manifest[$viteMainScript]["file"]."?".$cacheBusterSuffix, true);
+			$viteMainStyle !== false && self::addStyleFile("header", $assetsPath.$manifest[$viteMainStyle]["file"]."?".$cacheBusterSuffix);
+			$viteMainScript !== false && self::addScriptFile("footer", $assetsPath.$manifest[$viteMainScript]["file"]."?".$cacheBusterSuffix, true);
 		}
 	}
 
