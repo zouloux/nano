@@ -46,7 +46,7 @@ class AssetsHelper
 			// Get default vite proxy
 			$viteProxy = (
 			( $viteProxy === true || strtolower($viteProxy) == "true" || $viteProxy == "1" )
-				? "http://localhost:5173/"
+				? "http://".$_SERVER["HTTP_HOST"].":5173/"
 				: rtrim($viteProxy, "/")."/"
 			);
 			// Set assets to proxy vite dev server
