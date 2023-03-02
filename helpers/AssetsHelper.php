@@ -45,7 +45,7 @@ class AssetsHelper
 		if ( $viteProxy ) {
 			// Get default vite proxy
 			$viteProxy = (
-				( $viteProxy === true || strtolower($viteProxy) == "true" || $viteProxy == "1" )
+			( $viteProxy === true || strtolower($viteProxy) == "true" || $viteProxy == "1" )
 				? "http://localhost:5173/"
 				: rtrim($viteProxy, "/")."/"
 			);
@@ -60,22 +60,42 @@ class AssetsHelper
 			// Load manifest json file into assets directory
 			$path = Nano::path($assetsPath, 'manifest', 'json');
 			$manifest = Nano::readJSON5($path, false, true);
+			//dump($manifest);
 			if ( is_null($manifest) )
 				return;
 			// Add entry points
 			$viteMainStyle !== false && self::addStyleFile($styleLocation, $assetsPath.$manifest[$viteMainStyle]["file"]."?".$cacheBusterSuffix);
-			$viteMainScript !== false && self::addScriptFile($scriptLocation, $assetsPath.$manifest[$viteMainScript]["file"]."?".$cacheBusterSuffix, true, true);
+			if ( $viteMainScript !== false ) {
+				// Add main JS module
+				self::addScriptFile($scriptLocation, $assetsPath.$manifest[$viteMainScript]["file"]."?".$cacheBusterSuffix, true, true);
+				// Get legacy entry points
+				foreach ( $manifest as $key => $entry ) {
+					if ( !isset($entry["isEntry"]) || !$entry["isEntry"] ) continue;
+					if ( $key === $viteMainScript ) continue;
+					// Legacy polyfills src is something like : "../../vite/legacy-polyfills-legacy"
+					if ( stripos($entry["src"], "legacy-polyfills-legacy") !== false )
+						$legacyPolyfills = $entry;
+					// Legacy entry points src is something like : "index-legacy.tsx"
+					else if ( stripos($entry["src"], "-legacy.") !== false )
+						$legacyEntryPoint = $entry;
+				}
+				// Add polyfills as nomodule first
+				if ( isset($legacyPolyfills) )
+					self::addScriptFile($scriptLocation, $assetsPath.$legacyPolyfills["file"]."?".$cacheBusterSuffix, false);
+				// Then add legacy entry point as nomodule
+				if ( isset($legacyEntryPoint) )
+					self::addScriptFile($scriptLocation, $assetsPath.$legacyEntryPoint["file"]."?".$cacheBusterSuffix, false);
+			}
 		}
 	}
 
 	public static function addScriptFile ( $location, $href, $module, $async = false, $defer = false ) {
-		$script = [
+		NanoUtils::dotAdd( self::$__assets, $location.".scripts", [[
 			"href" => $href,
 			"module" => $module,
 			"async" => $async,
 			"defer" => $defer,
-		];
-		NanoUtils::dotSet( self::$__assets, $location.".scripts", [ $script ]);
+		]]);
 	}
 
 	public static function addStyleFile ( $location, $href ) {
@@ -96,8 +116,14 @@ class AssetsHelper
 		foreach ( $assets as $asset ) {
 			if ( $type === "styles" )
 				$buffer .= '<link rel="stylesheet" type="text/css" href="'.$asset["href"].'" />';
-			if ( $type === "scripts" )
-				$buffer .= '<script src="'.$asset["href"].'" type="module"'.( $asset["async"] ? " async" : "").( $asset["defer"] ?  "defer" : "").'></script>';
+			if ( $type === "scripts" ) {
+				$arguments = [
+					$asset["module"] ? 'type="module"' : 'nomodule',
+					$asset["async"] ? "async" : "",
+					$asset["defer"] ? "defer" : "",
+				];
+				$buffer .= '<script src="'.$asset["href"].'" '.implode(" ", $arguments).'></script>';
+			}
 		}
 		return $buffer;
 	}

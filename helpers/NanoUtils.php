@@ -98,8 +98,10 @@ class NanoUtils
 		// Add (will merge arrays or add numeric values)
 		if ( is_string($value) )
 			$array[ $key ] .= $value;
-		else
+		else if ( is_numeric($value) )
 			$array[ $key ] += $value;
+		else if ( is_array($value) )
+			$array[$key] = array_merge( $array[$key], $value );
 	}
 
 	// ------------------------------------------------------------------------- MUSTACHE
