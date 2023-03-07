@@ -99,6 +99,14 @@ class TwigRendererHelpers
 			})
 		);
 		/**
+		 * ASSETS HELPER
+		 */
+		$twig->addFunction(
+			new TwigFunction("getAssetTag", function ($location, $type) {
+				return new \Twig\Markup( AssetsHelper::getAssetTags($location, $type), "UTF-8" );
+			})
+		);
+		/**
 		 * VAR DUMP
 		 * --------
 		 * Dump any variable to the nano debug bar.
