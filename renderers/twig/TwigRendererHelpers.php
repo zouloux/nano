@@ -103,7 +103,7 @@ class TwigRendererHelpers
 		 */
 		$twig->addFunction(
 			new TwigFunction("getAssetTag", function ($location, $type) {
-				return new \Twig\Markup( AssetsHelper::getAssetTags($location, $type), "UTF-8" );
+				return new \Twig\Markup( \AssetsHelper::getAssetTags($location, $type), "UTF-8" );
 			})
 		);
 		/**
