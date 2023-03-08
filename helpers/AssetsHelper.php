@@ -9,6 +9,10 @@ use Nano\helpers\NanoUtils;
 class AssetsHelper
 {
 	protected static array $__assets = [
+		"top" => [
+			"scripts" => [],
+			"styles" => [],
+		],
 		"header" => [
 			"scripts" => [],
 			"styles" => [],
@@ -51,9 +55,25 @@ class AssetsHelper
 			);
 			// Set assets to proxy vite dev server
 			$base = $viteProxy.ltrim($assetsPath, "/");
-			self::addScriptFile("header", $base."@vite/client", true);
-			$viteMainStyle !== false && self::addStyleFile($styleLocation, $base.$viteMainStyle);
-			$viteMainScript !== false && self::addScriptFile($scriptLocation, $base.$viteMainScript, true, true);
+			self::addScriptFile("top", $base."@vite/client", true);
+			//			$viteMainStyle !== false && self::addStyleFile($styleLocation, $base.$viteMainStyle);
+			//			$viteMainStyle !== false && self::addScriptFile($styleLocation, $base.$viteMainStyle, true, false);
+			$viteMainScript !== false && self::addScriptFile($scriptLocation, $base.$viteMainScript, true, false);
+
+			//			if ( $viteMainScript ) {
+			//				$src = $base.$viteMainScript;
+			//				self::addScriptInline("header", <<<EOD
+			//function loadScriptSync (src) {
+			//    var script = document.createElement('script');
+			//    script.src = src;
+			//    script.type = "module";
+			//    script.async = false;
+			//    script.defer = false;
+			//    document.getElementsByTagName('head')[0].appendChild(script);
+			//}
+			//loadScriptSync("$src")
+			//EOD);
+			//			}
 		}
 		// Use vite built assets
 		else {
@@ -89,7 +109,7 @@ class AssetsHelper
 		}
 	}
 
-	public static function addScriptFile ( $location, $href, $module, $async = false, $defer = false ) {
+	public static function addScriptFile ( $location, $href, $module = null, $async = false, $defer = false ) {
 		NanoUtils::dotAdd( self::$__assets, $location.".scripts", [[
 			"href" => $href,
 			"module" => $module,
@@ -98,31 +118,52 @@ class AssetsHelper
 		]]);
 	}
 
-	public static function addStyleFile ( $location, $href ) {
-		$style = [
-			"href" => $href
-		];
-		NanoUtils::dotSet( self::$__assets, $location.".styles", [ $style ]);
+	public static function addScriptInline ( $location, $content, $module = null ) {
+		NanoUtils::dotAdd( self::$__assets, $location.".scripts", [[
+			"content" => $content,
+			"module" => $module,
+		]]);
 	}
 
-	// TODO
-	//	public static function addScriptInline ( $location ) {}
-	// TODO
-	//	public static function addStyleInline ( $location ) {}
+	public static function addStyleFile ( $location, $href ) {
+		NanoUtils::dotSet( self::$__assets, $location.".styles", [[
+			"href" => $href
+		]]);
+	}
+
+	public static function addStyleInline ( $location, $content ) {
+		NanoUtils::dotAdd( self::$__assets, $location.".styles", [[
+			"content" => $content
+		]]);
+	}
+
 
 	public static function getAssetTags ( $location, $type ) {
+		// FIXME : Sanitize
 		$assets = NanoUtils::dotGet( self::$__assets, $location.".".$type );
 		$buffer = "";
 		foreach ( $assets as $asset ) {
-			if ( $type === "styles" )
-				$buffer .= '<link rel="stylesheet" type="text/css" href="'.$asset["href"].'" />';
+			if ( $type === "styles" ) {
+				if ( isset($asset["content"]) )
+					$buffer .= '<style>'.$asset['content'].'</style>';
+				else
+					$buffer .= '<link rel="stylesheet" type="text/css" href="'.$asset["href"].'" />';
+			}
 			if ( $type === "scripts" ) {
-				$arguments = [
-					$asset["module"] ? 'type="module"' : 'nomodule',
-					$asset["async"] ? "async" : "",
-					$asset["defer"] ? "defer" : "",
-				];
-				$buffer .= '<script src="'.$asset["href"].'" '.implode(" ", $arguments).'></script>';
+				$arguments = [];
+				if ( is_bool($asset["module"]) )
+					$arguments[] = $asset["module"] ? 'type="module"' : 'nomodule';
+				if ( isset($asset["content"]) )
+					$inline = $asset["content"];
+				else {
+					$arguments = array_merge($arguments, [
+						'src="'.$asset["href"].'"',
+						$asset["async"] ? "async" : "",
+						$asset["defer"] ? "defer" : "",
+					]);
+					$inline = "";
+				}
+				$buffer .= '<script  '.implode(" ", $arguments).'>'.$inline.'</script>';
 			}
 		}
 		return $buffer;
