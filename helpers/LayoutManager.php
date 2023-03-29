@@ -79,7 +79,14 @@ class LayoutManager
 	 * @return void
 	 */
 	public static function injectMetaData ( $metaData ) {
-		self::$__metaData = array_merge( self::$__metaData, $metaData );
+		if ( $metaData["description"] )
+			self::$__metaData["description"] = $metaData["description"];
+		if ( $metaData["shareTitle"] )
+			self::$__metaData["shareTitle"] = $metaData["shareTitle"];
+		if ( $metaData["shareDescription"] )
+			self::$__metaData["shareDescription"] = $metaData["shareDescription"];
+		if ( $metaData["shareImage"] )
+			self::$__metaData["shareImage"] = $metaData["shareImage"];
 	}
 
 	// ------------------------------------------------------------------------- VIEWPORT
@@ -175,42 +182,42 @@ class LayoutManager
 	public static function renderMetaTags ( bool $returnAsArray = false ) {
 		$buffer = [];
 		// --- CHARSET
-		if ( !empty(self::$__charset) )
-			$buffer[] = "<meta charset=".addslashes(self::$__charset)." />";
+		if ( self::$__charset )
+			$buffer[] = "<meta charset=\"".addslashes(self::$__charset)."\" />";
 		// --- VIEWPORT
-		if ( !empty(self::$__viewport) )
+		if ( self::$__viewport )
 			$buffer[] = "<meta name=\"viewport\" content=\"".addslashes(self::$__viewport)."\" />";
 		// --- TITLE
 		$buffer[] = "<title>".strip_tags(self::$__title)."</title>";
 		// --- DESCRIPTION
-		if ( !empty( self::$__metaData["description"] ) )
+		if ( self::$__metaData["description"] )
 			$buffer[] = "<meta name=\"description\" content=\"".addslashes(self::$__metaData["description"])."\">";
 		// --- OG TITLE
-		if ( !empty( self::$__metaData["shareTitle"] ) )
+		if ( self::$__metaData["shareTitle"] )
 			$buffer[] = "<meta property=\"og:title\" content=\"".addslashes(self::$__metaData["shareTitle"])."\" />";
 		// --- OG DESCRIPTION
-		if ( !empty( self::$__metaData["shareDescription"] ) )
+		if ( self::$__metaData["shareDescription"] )
 			$buffer[] = "<meta property=\"og:description\" content=\"".addslashes(self::$__metaData["shareDescription"])."\" />";
 		// --- OG IMAGE
-		if ( !empty( self::$__metaData["shareImage"] ) )
+		if ( self::$__metaData["shareImage"] )
 			$buffer[] = "<meta property=\"og:image\" content=\"".addslashes(self::$__metaData["shareImage"])."\" />";
 		// --- FAVICON 32
-		if ( !is_null(self::$__icons[0]) )
+		if ( self::$__icons[0] )
             $buffer[] = "<link rel=\"icon\" type=\"image/png\" href=\"".addslashes(self::$__icons[0])."\" />";
 		// --- ICON 1024
-		if ( !is_null(self::$__icons[1]) )
+		if ( self::$__icons[1] )
             $buffer[] = "<link rel=\"apple-touch-icon\" type=\"image/png\" href=\"".addslashes(self::$__icons[1])."\" />";
 		// --- WEB APP CAPABLE
-		if ( !empty(self::$__appTheme) )
+		if ( self::$__appTheme )
 			$buffer[] = "<meta name=\"apple-mobile-web-app-capable\" content=\"yes\" />";
 		// --- WEB APP TITLE
-		if ( !is_null(self::$__appTheme["title"]) && !empty(self::$__appTheme["title"]) )
+		if ( self::$__appTheme["title"] )
 			$buffer[] = "<meta name=\"apple-mobile-web-app-title\" content=\"".addslashes(self::$__appTheme["title"])."\" />";
 		// --- WEB APP IOS TITLE BAR
-		if ( !is_null(self::$__appTheme["titleBar"]) && self::$__appTheme["titleBar"] != "none" )
+		if ( self::$__appTheme["titleBar"] && self::$__appTheme["titleBar"] != "none" )
 			$buffer[] = "<meta name=\"apple-mobile-web-app-status-bar-style\" content=\"".addslashes(self::$__appTheme["titleBar"])."\" />";
 		// --- WEB APP COLOR
-		if ( !is_null(self::$__appTheme["color"]) && !empty(self::$__appTheme["color"]) ) {
+		if ( self::$__appTheme["color"] ) {
 			// MICROSOFT
 			$buffer[] = "<meta name=\"msapplication-config\" content=\"none\" />";
 			$buffer[] = "<meta name=\"msapplication-TileImage\" content=\"".addslashes(self::$__appTheme["color"])."\" />";
@@ -228,9 +235,9 @@ class LayoutManager
 
 	public static function renderHTMLAttributes () {
 		$buffer = [];
-		if ( !empty(self::$__htmlLang) )
+		if ( self::$__htmlLang )
 			$buffer[] = "lang=\"".addslashes(self::$__htmlLang)."\"";
-		if ( !empty(self::$__htmlClasses) )
+		if ( self::$__htmlClasses )
 			$buffer[] = "class=\"".addslashes(implode(" ", self::$__htmlClasses))."\"";
 		return implode(" ", $buffer);
 	}
