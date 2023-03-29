@@ -191,34 +191,34 @@ class LayoutManager
 		// --- TITLE
 		$buffer[] = "<title>".strip_tags(self::$__title)."</title>";
 		// --- DESCRIPTION
-		if ( self::$__metaData["description"] )
+		if ( isset(self::$__metaData["description"]) && self::$__metaData["description"] )
 			$buffer[] = "<meta name=\"description\" content=\"".addslashes(self::$__metaData["description"])."\">";
 		// --- OG TITLE
-		if ( self::$__metaData["shareTitle"] )
+		if ( isset(self::$__metaData["shareTitle"]) && self::$__metaData["shareTitle"] )
 			$buffer[] = "<meta property=\"og:title\" content=\"".addslashes(self::$__metaData["shareTitle"])."\" />";
 		// --- OG DESCRIPTION
-		if ( self::$__metaData["shareDescription"] )
+		if ( isset(self::$__metaData["shareDescription"]) && self::$__metaData["shareDescription"] )
 			$buffer[] = "<meta property=\"og:description\" content=\"".addslashes(self::$__metaData["shareDescription"])."\" />";
 		// --- OG IMAGE
-		if ( self::$__metaData["shareImage"] )
+		if ( isset(self::$__metaData["shareImage"]) && self::$__metaData["shareImage"] )
 			$buffer[] = "<meta property=\"og:image\" content=\"".addslashes(self::$__metaData["shareImage"])."\" />";
 		// --- FAVICON 32
-		if ( self::$__icons[0] )
+		if ( isset(self::$__icons[0]) && self::$__icons[0] )
             $buffer[] = "<link rel=\"icon\" type=\"image/png\" href=\"".addslashes(self::$__icons[0])."\" />";
 		// --- ICON 1024
-		if ( self::$__icons[1] )
+		if ( isset(self::$__icons[1]) && self::$__icons[1] )
             $buffer[] = "<link rel=\"apple-touch-icon\" type=\"image/png\" href=\"".addslashes(self::$__icons[1])."\" />";
 		// --- WEB APP CAPABLE
 		if ( self::$__appTheme )
 			$buffer[] = "<meta name=\"apple-mobile-web-app-capable\" content=\"yes\" />";
 		// --- WEB APP TITLE
-		if ( self::$__appTheme["title"] )
+		if ( isset(self::$__appTheme["title"]) && self::$__appTheme["title"] )
 			$buffer[] = "<meta name=\"apple-mobile-web-app-title\" content=\"".addslashes(self::$__appTheme["title"])."\" />";
 		// --- WEB APP IOS TITLE BAR
-		if ( self::$__appTheme["titleBar"] && self::$__appTheme["titleBar"] != "none" )
+		if ( isset(self::$__appTheme["titleBar"]) && self::$__appTheme["titleBar"] && self::$__appTheme["titleBar"] != "none" )
 			$buffer[] = "<meta name=\"apple-mobile-web-app-status-bar-style\" content=\"".addslashes(self::$__appTheme["titleBar"])."\" />";
 		// --- WEB APP COLOR
-		if ( self::$__appTheme["color"] ) {
+		if ( isset(self::$__appTheme["color"]) && self::$__appTheme["color"] ) {
 			// MICROSOFT
 			$buffer[] = "<meta name=\"msapplication-config\" content=\"none\" />";
 			$buffer[] = "<meta name=\"msapplication-TileImage\" content=\"".addslashes(self::$__appTheme["color"])."\" />";
