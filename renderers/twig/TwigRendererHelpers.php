@@ -99,11 +99,21 @@ class TwigRendererHelpers
 			})
 		);
 		/**
-		 * ASSETS HELPER
+		 * LAYOUT HELPER
 		 */
 		$twig->addFunction(
-			new TwigFunction("getAssetTag", function ($location, $type) {
-				return new \Twig\Markup( \Nano\helpers\AssetsHelper::getAssetTags($location, $type), "UTF-8" );
+			new TwigFunction("layoutHTMLAttributes", function () {
+				return new \Twig\Markup( \Nano\helpers\LayoutManager::renderHTMLAttributes(), "UTF-8" );
+			})
+		);
+		$twig->addFunction(
+			new TwigFunction("layoutMetaTags", function () {
+				return new \Twig\Markup( \Nano\helpers\LayoutManager::renderMetaTags(), "UTF-8" );
+			})
+		);
+		$twig->addFunction(
+			new TwigFunction("layoutAssetTags", function ($location, $type) {
+				return new \Twig\Markup( \Nano\helpers\LayoutManager::renderAssetTags($location, $type), "UTF-8" );
 			})
 		);
 		/**
@@ -173,6 +183,13 @@ class TwigRendererHelpers
 				}
 
 				return implode( $insertBreaks ? "<br/>" : '', $outputLines );
+			})
+		);
+		// --------------------------------------------------------------------- SHUFFLE
+		$twig->addFunction(
+			new TwigFunction('shuffle', function ($a) {
+				shuffle($a);
+				return $a;
 			})
 		);
 		// ---------------------------------------------------------------------
