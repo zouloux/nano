@@ -39,8 +39,8 @@ trait Nano_cache {
 		return apcu_store( $key, $result );
 	}
 
-	static function cacheDefine ( $key, $getHandler, $retrieveHandler = null ) {
-		if ( Nano::getEnv("NANO_DISABLE_CACHE", false) )
+	static function cacheDefine ( $key, $getHandler, $retrieveHandler = null, $disableCache = false ) {
+		if ( Nano::getEnv("NANO_DISABLE_CACHE", false) || $disableCache )
 			return $getHandler();
 		$key = self::$__cachePrefix.$key;
 		if ( apcu_exists( $key ) ) {
