@@ -491,10 +491,11 @@ class LayoutManager
 	 * @param string $indexScript Index script file name in vite manifest
 	 * @param string $indexStyle Index style file name in vite manifest
 	 * @param string $assetsDirectory Path to generated assets directory from base.
+	 * @param string $styleLocation Style location
 	 * @return bool Will return true if in dev mode.
 	 * @throws \Exception
 	 */
-	public static function autoAssets ( string $indexScript, string $indexStyle, $assetsDirectory = "assets/" ) {
+	public static function autoAssets ( string $indexScript, string $indexStyle, string $assetsDirectory = "assets/", string $styleLocation = "header" ) {
 		// Get config from .env
 		$viteProxy = !!Nano::getEnv("NANO_VITE_PROXY", false);
 		$assetsPath = Nano::getBase().$assetsDirectory;
@@ -508,7 +509,7 @@ class LayoutManager
 			$indexScript, $viteProxy ? false : $indexStyle,
 			$assetsPath, $cacheBuster,
 			// Place assets in footer because we have a pre-loader
-			'footer', 'footer'
+			'footer', $styleLocation
 		);
 		return $viteProxy;
 	}
