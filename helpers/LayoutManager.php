@@ -392,21 +392,21 @@ class LayoutManager
 			}
 			// Generate script tags
 			if ( $type === "scripts" ) {
-				$arguments = [];
+				$arguments = ['']; // empty string so implode will always start with a space if we have more than 0 argument
 				if ( is_bool($asset["module"]) )
 					$arguments[] = $asset["module"] ? 'type="module"' : 'nomodule';
 				if ( isset($asset["content"]) )
 					$inline = $asset["content"];
 				else {
-					$arguments = array_merge($arguments, [
-						'src="'.addslashes($asset["href"]).'"',
-						$asset["async"] ? "async" : "",
-						$asset["defer"] ? "defer" : "",
-					]);
+					$arguments[] = 'src="'.addslashes($asset["href"]).'"';
+					if ( $asset["async"] )
+						$arguments[] = "async";
+					if ( $asset["defer"] )
+						$arguments[] = "defer";
 					$inline = "";
 				}
 				// FIXME : $inline is not sanitized here
-				$buffer[] = '<script  '.implode(" ", $arguments).'>'.$inline.'</script>';
+				$buffer[] = '<script'.implode(" ", $arguments).'>'.$inline.'</script>';
 			}
 		}
 		return (

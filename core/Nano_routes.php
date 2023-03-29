@@ -87,4 +87,23 @@ trait Nano_routes {
 		$response->header("Content-Type: $contentType; charset=utf-8");
 		print (is_array($lines) ? implode("\n", $lines) : $lines);
 	}
+
+	/**
+	 * Will return $data as JSON if the GET parameters "json" is set to 1 or true.
+	 * If $data is null, will return $notFoundData as JSON with a 404 http code.
+	 * Will exit if returned JSON. Will return false otherwise
+	 * @param mixed $data Data to convert in JSON
+	 * @param mixed $notFoundData Returned data with 404 http code if $data is null.
+	 * @param string $getKey $_GET parameter to return JSON.
+	 * @return bool
+	 */
+	static function routeAsJSON ( $data, $notFoundData, $getKey = "json" ) {
+		if ( isset($_GET[$getKey]) && ($_GET[$getKey] == "1" || $_GET[$getKey] == "true" || $_GET[$getKey] == "") ) {
+			if ( is_null($data) )
+				Nano::json( $notFoundData, 404 );
+			else
+				Nano::json( $data );
+		}
+		return false;
+	}
 }
