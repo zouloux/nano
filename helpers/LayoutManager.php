@@ -79,14 +79,15 @@ class LayoutManager
 	 * @return void
 	 */
 	public static function injectMetaData ( $metaData ) {
-		if ( $metaData["description"] )
-			self::$__metaData["description"] = $metaData["description"];
-		if ( $metaData["shareTitle"] )
-			self::$__metaData["shareTitle"] = $metaData["shareTitle"];
-		if ( $metaData["shareDescription"] )
-			self::$__metaData["shareDescription"] = $metaData["shareDescription"];
-		if ( $metaData["shareImage"] )
-			self::$__metaData["shareImage"] = $metaData["shareImage"];
+		self::overrideMetaKey( $metaData, "description" );
+		self::overrideMetaKey( $metaData, "shareTitle" );
+		self::overrideMetaKey( $metaData, "shareDescription" );
+		self::overrideMetaKey( $metaData, "shareImage" );
+	}
+
+	protected static function overrideMetaKey ( $metaData, $key ) {
+		if ( isset($metaData[$key]) && $metaData[$key] )
+			self::$__metaData[$key] = $metaData[$key];
 	}
 
 	// ------------------------------------------------------------------------- VIEWPORT
