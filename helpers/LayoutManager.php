@@ -272,7 +272,7 @@ class LayoutManager
 	 * @param string $scriptLocation
 	 * @param string $styleLocation
 	 * @return void
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public static function addViteAssets (
 		mixed $viteProxy,
@@ -368,12 +368,12 @@ class LayoutManager
 	 * @param string $type Type of asset tag to generate ( style / script )
  	 * @param bool $returnAsArray Return as array to be able to filter it before rendering it.
 	 * @return string|array
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public static function renderAssetTags ( string $location, string $type, bool $returnAsArray = false ) {
 		// Get assets for this type and location
 		if ( !isset(self::$__assets[$location]) )
-			throw new Exception("LayoutManager::renderAssetTags // Invalid location $location");
+			throw new \Exception("LayoutManager::renderAssetTags // Invalid location $location");
 		$assets = NanoUtils::dotGet( self::$__assets, $location.".".$type );
 		if ( !is_array($assets) || empty($assets) )
 			return "";
@@ -483,12 +483,12 @@ class LayoutManager
 	 * @param string $indexScript Index script file name in vite manifest
 	 * @param string $indexStyle Index style file name in vite manifest
 	 * @param string $assetsDirectory Path to generated assets directory from base.
-	 * @return void
-	 * @throws Exception
+	 * @return bool Will return true if in dev mode.
+	 * @throws \Exception
 	 */
-	public static function autoAssets ( $indexScript = "index.tsx", $indexStyle = "index.css", $assetsDirectory = "assets/" ) {
+	public static function autoAssets ( string $indexScript, string $indexStyle, $assetsDirectory = "assets/" ) {
 		// Get config from .env
-		$viteProxy = Nano::getEnv("NANO_VITE_PROXY", false);
+		$viteProxy = !!Nano::getEnv("NANO_VITE_PROXY", false);
 		$assetsPath = Nano::getBase().$assetsDirectory;
 		// Read cache buster version
 		Nano::loadAppData("version", "version", "txt", "0");
@@ -502,5 +502,6 @@ class LayoutManager
 			// Place assets in footer because we have a pre-loader
 			'footer', 'footer'
 		);
+		return $viteProxy;
 	}
 }
