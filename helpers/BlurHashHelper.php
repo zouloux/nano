@@ -27,7 +27,7 @@ class BlurHashHelper
 	public static function blurHashToBase64PNGCached ( $blurHashArray, $punch = 1.1, $disableCache = false ) {
 		$cacheKey = "__blurCache__".json_encode($blurHashArray)."__".$punch;
 		return Nano::cacheDefine($cacheKey, function () use ( $blurHashArray, $punch ) {
-			BlurHashHelper::blurHashToBase64PNG( $blurHashArray, $punch );
+			return BlurHashHelper::blurHashToBase64PNG( $blurHashArray, $punch );
 		}, null, $disableCache);
 	}
 }
