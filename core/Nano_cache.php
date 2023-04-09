@@ -35,6 +35,10 @@ trait Nano_cache {
 			self::$__cachePath = Nano::path( "app/data/", "cache/" );
 			self::cacheInitDirectory();
 		}
+		else if ( self::$__cacheMethod !== "apcu" ) {
+			$cache = self::$__cacheMethod;
+			throw new \Exception("Nano_cache::cacheInit // Invalid cache method $cache set from dot env");
+		}
 	}
 
 	protected static string $__cachePrefix = "_nano_";
