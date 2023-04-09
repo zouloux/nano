@@ -51,6 +51,8 @@ class Nano
 		Nano::$__controllerDirectories = $controllerDirectories;
 		Nano::$__controllersSuffix = $controllersSuffix;
 		Nano::$__appDataDirectory = $appDataDirectory;
+		// Init cache
+		Nano::cacheInit();
 		// Init session before anything else
 		session_cache_limiter(false);
 		session_start();
