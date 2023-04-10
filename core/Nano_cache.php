@@ -22,6 +22,8 @@ trait Nano_cache {
 	 * Init cache system from envs
 	 */
 	protected static function cacheInit () {
+		// TODO : Configurable
+		self::$__cachePath = Nano::path( "app/data/", "cache/" );
 		// Read cache method from dot env
 		self::$__cacheMethod = strtolower( Nano::getEnv("NANO_CACHE_METHOD", "auto") );
 		// Legacy support for disable cache feature
@@ -31,10 +33,8 @@ trait Nano_cache {
 		else if ( self::$__cacheMethod === "auto" )
 			self::$__cacheMethod = function_exists("apcu_fetch") ? "apcu" : "file";
 		// Init cache directory for file cache
-		else if ( self::$__cacheMethod === "file" ) {
-			self::$__cachePath = Nano::path( "app/data/", "cache/" );
+		else if ( self::$__cacheMethod === "file" )
 			self::cacheInitDirectory();
-		}
 		else if ( self::$__cacheMethod !== "apcu" ) {
 			$cache = self::$__cacheMethod;
 			throw new \Exception("Nano_cache::cacheInit // Invalid cache method $cache set from dot env");
