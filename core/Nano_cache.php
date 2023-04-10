@@ -12,7 +12,7 @@ trait Nano_cache {
 
 	// Can be "auto" in dot env to be defined automatically
 	// "apcu" | "file" | "none"
-	protected static string $__cacheMethod;
+	protected static string $__cacheMethod = "none";
 
 	// File path to cache directory for file cache system
 	protected static string $__cachePath;
@@ -23,9 +23,9 @@ trait Nano_cache {
 	 */
 	protected static function cacheInit () {
 		// Read cache method from dot env
-		self::$__cacheMethod = Nano::getEnv("NANO_CACHE_METHOD", "auto");
+		self::$__cacheMethod = strtolower( Nano::getEnv("NANO_CACHE_METHOD", "auto") );
 		// Legacy support for disable cache feature
-		if ( Nano::getEnv("NANO_DISABLE_CACHE", false) )
+		if ( Nano::getEnv("NANO_DISABLE_CACHE", false) || self::$__cacheMethod === "none" )
 			self::$__cacheMethod = "none";
 		// Auto mode, we check if apcu is available, otherwise we select file cache
 		else if ( self::$__cacheMethod === "auto" )

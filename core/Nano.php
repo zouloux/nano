@@ -51,8 +51,6 @@ class Nano
 		Nano::$__controllerDirectories = $controllerDirectories;
 		Nano::$__controllersSuffix = $controllersSuffix;
 		Nano::$__appDataDirectory = $appDataDirectory;
-		// Init cache
-		Nano::cacheInit();
 		// Init session before anything else
 		session_cache_limiter(false);
 		session_start();
@@ -64,6 +62,8 @@ class Nano
 	 * Start and execute matching route.
 	 */
 	static function start () {
+		// Init cache
+		Nano::cacheInit();
 		// Set base from env
 		if ( !is_null(Nano::getEnv('NANO_BASE')) )
 			Nano::setBase( Nano::getEnv('NANO_BASE') );
