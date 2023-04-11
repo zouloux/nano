@@ -62,8 +62,6 @@ class Nano
 	 * Start and execute matching route.
 	 */
 	static function start () {
-		// Init cache
-		Nano::cacheInit();
 		// Set base from env
 		if ( !is_null(Nano::getEnv('NANO_BASE')) )
 			Nano::setBase( Nano::getEnv('NANO_BASE') );

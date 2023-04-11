@@ -12,7 +12,7 @@ trait Nano_cache {
 
 	// Can be "auto" in dot env to be defined automatically
 	// "apcu" | "file" | "none"
-	protected static string $__cacheMethod = "none";
+	protected static string $__cacheMethod;
 
 	// File path to cache directory for file cache system
 	protected static string $__cachePath;
@@ -22,6 +22,8 @@ trait Nano_cache {
 	 * Init cache system from envs
 	 */
 	protected static function cacheInit () {
+		if ( isset(self::$__cacheMethod) )
+			return;
 		// TODO : Configurable
 		self::$__cachePath = Nano::path( "app/data/", "cache/" );
 		// Read cache method from dot env
@@ -74,8 +76,10 @@ trait Nano_cache {
 	/**
 	 * Clear all cache.
 	 * @return bool
+	 * @throws \Exception
 	 */
 	static function cacheClear () {
+		self::cacheInit();
 		if ( self::$__cacheMethod === "apcu" )
 			return apcu_clear_cache();
 		else if ( self::$__cacheMethod === "file" ) {
@@ -93,8 +97,10 @@ trait Nano_cache {
 	 * Check if a value is stored in cache on this key
 	 * @param string $key Cache key, prefixed with cachePrefix.
 	 * @return boolean
+	 * @throws \Exception
 	 */
 	static function cacheHas ( string $key ) {
+		self::cacheInit();
 		$key = self::$__cachePrefix.$key;
 		if ( self::$__cacheMethod === "apcu" )
 			return apcu_exists( $key );
@@ -109,8 +115,10 @@ trait Nano_cache {
 	 * Retrieve a value from cache.
 	 * @param string $key Cache key, prefixed with cachePrefix.
 	 * @return mixed
+	 * @throws \Exception
 	 */
 	static function cacheGet ( string $key ) {
+		self::cacheInit();
 		$key = self::$__cachePrefix.$key;
 		if ( self::$__cacheMethod === "apcu" )
 			return apcu_fetch( $key );
@@ -127,8 +135,10 @@ trait Nano_cache {
 	 * @param string $key Cache key, prefixed with cachePrefix.
 	 * @param mixed $data Data to store, can be any type of value.
 	 * @return bool
+	 * @throws \Exception
 	 */
 	static function cacheSet ( string $key, mixed $data ) {
+		self::cacheInit();
 		$key = self::$__cachePrefix.$key;
 		if ( self::$__cacheMethod === "apcu" )
 			return !!apcu_store( $key, $data );
@@ -149,8 +159,10 @@ trait Nano_cache {
 	 * @param callable $retrieveHandler Called when value is retrieved from cache. TODO : ARGUMENTS
 	 * @param boolean $disableCache Set to true to disable cache, can be useful in some cases where you want the cache to be bypassed and the handler always called.
 	 * @return false|mixed
+	 * @throws \Exception
 	 */
 	static function cacheDefine ( $key, $getHandler, $retrieveHandler = null, $disableCache = false ) {
+		self::cacheInit();
 		// Always call handler if cache is disabled
 		if ( self::$__cacheMethod === "none" || $disableCache )
 			return $getHandler();
