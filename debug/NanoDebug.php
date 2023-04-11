@@ -131,7 +131,7 @@ class NanoDebug
 		$renderedHTML .= self::tabContent(
 			self::dumpToString([
 				'cookie' => $_COOKIE,
-				'env' => $_ENV,
+				'env' => Nano::getEnv("NANO_DEBUG_ENV", false) ? $_ENV : "NANO_DEBUG_ENV needs to be enabled",
 				'request' => $_REQUEST,
 				'server' => $_SERVER,
 				'session' => $_SESSION ?? [],
