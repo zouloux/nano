@@ -210,8 +210,9 @@ class NanoUtils
 			}
 		}
 		// Remove spaces between tags
-		$stream = preg_replace('/\s?<\s?/', '<', $stream);
-		$stream = preg_replace('/\s?>\s?/', '>', $stream);
+		// FIXME : Disabled because it remove spaces inside jsons and script tags !
+		/*$stream = preg_replace('/\s?<\s?/', '<', $stream);*/
+		/*$stream = preg_replace('/\s?>\s?/', '>', $stream);*/
 		return $stream;
 	}
 }
