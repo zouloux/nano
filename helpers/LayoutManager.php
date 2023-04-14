@@ -157,6 +157,19 @@ class LayoutManager
 		];
 	}
 
+	// ------------------------------------------------------------------------- FONT PRELOAD
+
+	protected static array $__fontPreloads = [];
+
+	/**
+	 * Add a font file to be preloaded.
+	 * @param string $path Path to the font resource. Can be woff or woff2.
+	 * @return void
+	 */
+	public static function addFondPreload ( $path ) {
+		self::$__fontPreloads[] = $path;
+	}
+
 	// ------------------------------------------------------------------------- RENDER META TAGS
 
 	/**
@@ -204,10 +217,10 @@ class LayoutManager
 			$buffer[] = "<meta property=\"og:image\" content=\"".addslashes(self::$__metaData["shareImage"])."\" />";
 		// --- FAVICON 32
 		if ( isset(self::$__icons[0]) && self::$__icons[0] )
-            $buffer[] = "<link rel=\"icon\" type=\"image/png\" href=\"".addslashes(self::$__icons[0])."\" />";
+			$buffer[] = "<link rel=\"icon\" type=\"image/png\" href=\"".addslashes(self::$__icons[0])."\" />";
 		// --- ICON 1024
 		if ( isset(self::$__icons[1]) && self::$__icons[1] )
-            $buffer[] = "<link rel=\"apple-touch-icon\" type=\"image/png\" href=\"".addslashes(self::$__icons[1])."\" />";
+			$buffer[] = "<link rel=\"apple-touch-icon\" type=\"image/png\" href=\"".addslashes(self::$__icons[1])."\" />";
 		// --- WEB APP CAPABLE
 		if ( self::$__appTheme )
 			$buffer[] = "<meta name=\"apple-mobile-web-app-capable\" content=\"yes\" />";
@@ -225,6 +238,13 @@ class LayoutManager
 			// OTHERS
 			$buffer[] = "<meta name=\"theme-color\" content=\"".addslashes(self::$__appTheme["color"])."\" />";
 		}
+		// --- FONT PRELOADS
+		if ( !empty(self::$__fontPreloads) ) {
+			// https://wp-rocket.me/blog/font-preloading-best-practices/
+			foreach ( self::$__fontPreloads as $href )
+				$buffer[] = "<link rel=\"preload\" as=\"font\" href=\"$href\" crossorigin=\"anonymous\" />";
+		}
+
 		return (
 			$returnAsArray
 			? $buffer
@@ -295,7 +315,7 @@ class LayoutManager
 		if ( $viteProxy ) {
 			// Get default vite proxy
 			$viteProxy = (
-				( $viteProxy === true || strtolower($viteProxy) == "true" || $viteProxy == "1" )
+			( $viteProxy === true || strtolower($viteProxy) == "true" || $viteProxy == "1" )
 				? "http://".$_SERVER["HTTP_HOST"].":5173/"
 				: rtrim($viteProxy, "/")."/"
 			);
@@ -333,6 +353,13 @@ class LayoutManager
 				// Then add legacy entry point as nomodule
 				if ( isset($legacyEntryPoint) )
 					self::addScriptFile($scriptLocation, $assetsPath.$legacyEntryPoint["file"]."?".$cacheBusterSuffix, false);
+			}
+			// Register fonts to preload from manifest
+			foreach ( $manifest as $key => $entry ) {
+				$path = $entry["file"] ?? "";
+				$extension = strtolower( pathinfo($path, PATHINFO_EXTENSION) );
+				if ( $extension === "woff" || $extension === "woff2" )
+					self::addFondPreload( $assetsPath.$path."?".$cacheBusterSuffix );
 			}
 		}
 	}
@@ -374,7 +401,7 @@ class LayoutManager
 	 * Render assets tags.
 	 * @param string $location Location of registered assets ( top / header / footer )
 	 * @param string $type Type of asset tag to generate ( style / script )
- 	 * @param bool $returnAsArray Return as array to be able to filter it before rendering it.
+	 * @param bool $returnAsArray Return as array to be able to filter it before rendering it.
 	 * @return string|array
 	 * @throws \Exception
 	 */
