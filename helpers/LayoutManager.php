@@ -242,7 +242,8 @@ class LayoutManager
 		if ( !empty(self::$__fontPreloads) ) {
 			// https://wp-rocket.me/blog/font-preloading-best-practices/
 			foreach ( self::$__fontPreloads as $href )
-				$buffer[] = "<link rel=\"preload\" as=\"font\" href=\"$href\" crossorigin=\"anonymous\" />";
+				// Note : we do not specify type on purpose. Browsers should be smart enough to understand file type.
+				$buffer[] = "<link rel=\"preload\" as=\"font\" href=\"".addslashes($href)."\" crossorigin=\"anonymous\" />";
 		}
 
 		return (
@@ -539,5 +540,23 @@ class LayoutManager
 			'footer', $styleLocation
 		);
 		return $viteProxy;
+	}
+
+	// ------------------------------------------------------------------------- UMAMI
+
+	/**
+	 * Add umami tracker
+	 * @param string $umamiCode
+	 * @param string $location
+	 * @return void
+	 */
+	public static function setUmamiCode ( string $umamiCode, string $location = "header" ) {
+		LayoutManager::addScriptInline($location, implode(";", [
+			"var script = document.createElement('script')",
+			"script.async = true",
+			"script.dataset.websiteId = '".addslashes($umamiCode)."'",
+			"script.src='https://analytics.umami.is/script.js'",
+			"document.getElementsByTagName('head')[0].appendChild(script)"
+		]));
 	}
 }
