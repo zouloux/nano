@@ -128,15 +128,17 @@ class NanoDebug
 		$renderedHTML .= "	</div>";
 		// Init tab contents
 		$renderedHTML .= "	<div class='DebugBar_contents'>";
+		$debugEnv = Nano::getEnv("NANO_DEBUG_ENV", false);
+		$noDebugEnvMessage = "NANO_DEBUG_ENV needs to be enabled";
 		$renderedHTML .= self::tabContent(
 			self::dumpToString([
 				'cookie' => $_COOKIE,
-				'env' => Nano::getEnv("NANO_DEBUG_ENV", false) ? $_ENV : "NANO_DEBUG_ENV needs to be enabled",
+				'env' => $debugEnv ? $_ENV : $noDebugEnvMessage,
 				'request' => $_REQUEST,
-				'server' => $_SERVER,
+				'server' => $debugEnv ? $_SERVER : $noDebugEnvMessage,
 				'session' => $_SESSION ?? [],
 				'constants' => (
-					Nano::getEnv('NANO_CONSTANTS', false)
+				Nano::getEnv('NANO_CONSTANTS', false)
 					? get_defined_constants(1)
 					: "Constants can be very expansive to show. Set env NANO_CONSTANTS=true to show them."
 				)
