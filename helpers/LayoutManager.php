@@ -197,53 +197,53 @@ class LayoutManager
 		$buffer = [];
 		// --- CHARSET
 		if ( self::$__charset )
-			$buffer[] = "<meta charset=\"".addslashes(self::$__charset)."\" />";
+			$buffer[] = "<meta charset=\"".htmlspecialchars(self::$__charset)."\" />";
 		// --- VIEWPORT
 		if ( self::$__viewport )
-			$buffer[] = "<meta name=\"viewport\" content=\"".addslashes(self::$__viewport)."\" />";
+			$buffer[] = "<meta name=\"viewport\" content=\"".htmlspecialchars(self::$__viewport)."\" />";
 		// --- TITLE
-		$buffer[] = "<title>".strip_tags(self::$__title)."</title>";
+		$buffer[] = "<title>".htmlspecialchars(self::$__title)."</title>";
 		// --- DESCRIPTION
 		if ( isset(self::$__metaData["description"]) && self::$__metaData["description"] )
-			$buffer[] = "<meta name=\"description\" content=\"".addslashes(self::$__metaData["description"])."\">";
+			$buffer[] = "<meta name=\"description\" content=\"".htmlspecialchars(self::$__metaData["description"])."\">";
 		// --- OG TITLE
 		if ( isset(self::$__metaData["shareTitle"]) && self::$__metaData["shareTitle"] )
-			$buffer[] = "<meta property=\"og:title\" content=\"".addslashes(self::$__metaData["shareTitle"])."\" />";
+			$buffer[] = "<meta property=\"og:title\" content=\"".htmlspecialchars(self::$__metaData["shareTitle"])."\" />";
 		// --- OG DESCRIPTION
 		if ( isset(self::$__metaData["shareDescription"]) && self::$__metaData["shareDescription"] )
-			$buffer[] = "<meta property=\"og:description\" content=\"".addslashes(self::$__metaData["shareDescription"])."\" />";
+			$buffer[] = "<meta property=\"og:description\" content=\"".htmlspecialchars(self::$__metaData["shareDescription"])."\" />";
 		// --- OG IMAGE
 		if ( isset(self::$__metaData["shareImage"]) && self::$__metaData["shareImage"] )
-			$buffer[] = "<meta property=\"og:image\" content=\"".addslashes(self::$__metaData["shareImage"])."\" />";
+			$buffer[] = "<meta property=\"og:image\" content=\"".htmlspecialchars(self::$__metaData["shareImage"])."\" />";
 		// --- FAVICON 32
 		if ( isset(self::$__icons[0]) && self::$__icons[0] )
-			$buffer[] = "<link rel=\"icon\" type=\"image/png\" href=\"".addslashes(self::$__icons[0])."\" />";
+			$buffer[] = "<link rel=\"icon\" type=\"image/png\" href=\"".htmlspecialchars(self::$__icons[0])."\" />";
 		// --- ICON 1024
 		if ( isset(self::$__icons[1]) && self::$__icons[1] )
-			$buffer[] = "<link rel=\"apple-touch-icon\" type=\"image/png\" href=\"".addslashes(self::$__icons[1])."\" />";
+			$buffer[] = "<link rel=\"apple-touch-icon\" type=\"image/png\" href=\"".htmlspecialchars(self::$__icons[1])."\" />";
 		// --- WEB APP CAPABLE
 		if ( self::$__appTheme )
 			$buffer[] = "<meta name=\"apple-mobile-web-app-capable\" content=\"yes\" />";
 		// --- WEB APP TITLE
 		if ( isset(self::$__appTheme["title"]) && self::$__appTheme["title"] )
-			$buffer[] = "<meta name=\"apple-mobile-web-app-title\" content=\"".addslashes(self::$__appTheme["title"])."\" />";
+			$buffer[] = "<meta name=\"apple-mobile-web-app-title\" content=\"".htmlspecialchars(self::$__appTheme["title"])."\" />";
 		// --- WEB APP IOS TITLE BAR
 		if ( isset(self::$__appTheme["titleBar"]) && self::$__appTheme["titleBar"] && self::$__appTheme["titleBar"] != "none" )
-			$buffer[] = "<meta name=\"apple-mobile-web-app-status-bar-style\" content=\"".addslashes(self::$__appTheme["titleBar"])."\" />";
+			$buffer[] = "<meta name=\"apple-mobile-web-app-status-bar-style\" content=\"".htmlspecialchars(self::$__appTheme["titleBar"])."\" />";
 		// --- WEB APP COLOR
 		if ( isset(self::$__appTheme["color"]) && self::$__appTheme["color"] ) {
 			// MICROSOFT
 			$buffer[] = "<meta name=\"msapplication-config\" content=\"none\" />";
-			$buffer[] = "<meta name=\"msapplication-TileImage\" content=\"".addslashes(self::$__appTheme["color"])."\" />";
+			$buffer[] = "<meta name=\"msapplication-TileImage\" content=\"".htmlspecialchars(self::$__appTheme["color"])."\" />";
 			// OTHERS
-			$buffer[] = "<meta name=\"theme-color\" content=\"".addslashes(self::$__appTheme["color"])."\" />";
+			$buffer[] = "<meta name=\"theme-color\" content=\"".htmlspecialchars(self::$__appTheme["color"])."\" />";
 		}
 		// --- FONT PRELOADS
 		if ( !empty(self::$__fontPreloads) ) {
 			// https://wp-rocket.me/blog/font-preloading-best-practices/
 			foreach ( self::$__fontPreloads as $href )
 				// Note : we do not specify type on purpose. Browsers should be smart enough to understand file type.
-				$buffer[] = "<link rel=\"preload\" as=\"font\" href=\"".addslashes($href)."\" crossorigin=\"anonymous\" />";
+				$buffer[] = "<link rel=\"preload\" as=\"font\" href=\"".htmlspecialchars($href)."\" crossorigin=\"anonymous\" />";
 		}
 
 		return (
@@ -258,9 +258,9 @@ class LayoutManager
 	public static function renderHTMLAttributes () {
 		$buffer = [];
 		if ( self::$__htmlLang )
-			$buffer[] = "lang=\"".addslashes(self::$__htmlLang)."\"";
+			$buffer[] = "lang=\"".htmlspecialchars(self::$__htmlLang)."\"";
 		if ( self::$__htmlClasses )
-			$buffer[] = "class=\"".addslashes(implode(" ", self::$__htmlClasses))."\"";
+			$buffer[] = "class=\"".htmlspecialchars(implode(" ", self::$__htmlClasses))."\"";
 		return implode(" ", $buffer);
 	}
 
@@ -424,7 +424,7 @@ class LayoutManager
 					$buffer[] = '<style>'.$asset['content'].'</style>';
 				// Href
 				else
-					$buffer[] = '<link rel="stylesheet" type="text/css" href="'.addslashes($asset["href"]).'" />';
+					$buffer[] = '<link rel="stylesheet" type="text/css" href="'.htmlspecialchars($asset["href"]).'" />';
 			}
 			// Generate script tags
 			if ( $type === "scripts" ) {
@@ -434,7 +434,7 @@ class LayoutManager
 				if ( isset($asset["content"]) )
 					$inline = $asset["content"];
 				else {
-					$arguments[] = 'src="'.addslashes($asset["href"]).'"';
+					$arguments[] = 'src="'.htmlspecialchars($asset["href"]).'"';
 					if ( $asset["async"] )
 						$arguments[] = "async";
 					if ( $asset["defer"] )
@@ -554,7 +554,7 @@ class LayoutManager
 		LayoutManager::addScriptInline($location, implode(";", [
 			"var script = document.createElement('script')",
 			"script.async = true",
-			"script.dataset.websiteId = '".addslashes($umamiCode)."'",
+			"script.dataset.websiteId = '".htmlspecialchars($umamiCode)."'",
 			"script.src='https://analytics.umami.is/script.js'",
 			"document.getElementsByTagName('head')[0].appendChild(script)"
 		]));
