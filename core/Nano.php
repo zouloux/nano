@@ -65,9 +65,6 @@ class Nano
 		// Set base from env
 		if ( !is_null(Nano::getEnv('NANO_BASE')) )
 			Nano::setBase( Nano::getEnv('NANO_BASE') );
-		// Init debugger
-		if ( Nano::getEnv("NANO_DEBUG") )
-			NanoDebug::init();
 		// Browse all before route handlers and pass returned value to the next handler
 		$beforeStartProfile = NanoDebug::profile("Before start");
 		$beforeRouteArgument = null;

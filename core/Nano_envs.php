@@ -58,5 +58,8 @@ trait Nano_envs
 			$_ENV[ $key ] = $value;
 		}
 		$profiling();
+		// Init debugger
+		if ( Nano::getEnv("NANO_DEBUG") )
+			NanoDebug::init();
 	}
 }
