@@ -66,7 +66,7 @@ trait Nano_routes {
 	 * @param int $jsonDepth
 	 * @return void
 	 */
-	static function json ( mixed $object, int $code = 200, Response $response = null, int $jsonOptions = null, int $jsonDepth = 512 ) {
+	static function json ( mixed $object, int $code = 200, Response $response = null, int $jsonOptions = 0, int $jsonDepth = 512 ) {
 		$response ??= SimpleRouter::response();
 		$response->httpCode( $code );
 		$response->json( $object, $jsonOptions, $jsonDepth );
