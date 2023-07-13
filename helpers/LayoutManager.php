@@ -247,7 +247,7 @@ class LayoutManager
 		}
 
 		return (
-			$returnAsArray
+		$returnAsArray
 			? $buffer
 			: implode("\n", $buffer)
 		);
@@ -446,7 +446,7 @@ class LayoutManager
 			}
 		}
 		return (
-			$returnAsArray
+		$returnAsArray
 			? $buffer
 			: implode("\n", $buffer)
 		);
@@ -474,7 +474,9 @@ class LayoutManager
 	 *   $pageData
 	 *   |- title
 	 *   |- fields
-	 *      |- meta -> @see LayoutManager::injectMetaData
+	 *      |- meta
+	 * 			|- ... @see LayoutManager::injectMetaData
+	 * 			|- title ( will override page title )
 	 *
 	 * @param mixed $globals Bowl-like Globals.
 	 * @param mixed $pageData Bowl-like page data as array.
@@ -488,18 +490,26 @@ class LayoutManager
 		unset( $globals["meta"] );
 		// Override with page meta-data
 		if ( !is_null($pageData) && isset($pageData["fields"]["meta"]) ) {
+			if ( !empty($pageData["fields"]["meta"]["title"]) )
+				$titleOverride = $pageData["fields"]["meta"]["title"];
 			self::injectMetaData($pageData["fields"]["meta"]);
 			unset($pageData["fields"]["meta"]);
 		}
 		self::setHTMLLang( $htmlLang );
 		// Set page title
 		$pageTitle = (
-			is_null($pageData)
+		is_null($pageData)
 			? ( $globals["dictionaries"]["not-found"]["title"] ?? "Not found" )
 			: $pageData["title"]
 		);
-		$titleTemplate = $theme["pageTitleTemplate"] ?? "{{site}} - {{page}}";
-		self::setTitle( $pageTitle, $globals["siteName"], $titleTemplate );
+		// Title override from meta
+		if ( isset($titleOverride) )
+			self::setTitle( $titleOverride, "", "{{page}}" );
+		// Régular title from page data and template
+		else {
+			$titleTemplate = $theme["pageTitleTemplate"] ?? "{{site}} - {{page}}";
+			self::setTitle( $pageTitle, $globals["siteName"], $titleTemplate );
+		}
 		// Set UTF8 charset
 		self::setCharset( self::CHARSET_UTF8 );
 		// Set fixed view port
