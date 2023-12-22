@@ -555,17 +555,18 @@ class LayoutManager
 	// ------------------------------------------------------------------------- UMAMI
 
 	/**
-	 * Add umami tracker
+	 * Add Umami Tracker
 	 * @param string $umamiCode
+	 * @param string $umamiEndpoint
 	 * @param string $location
 	 * @return void
 	 */
-	public static function setUmamiCode ( string $umamiCode, string $location = "header" ) {
+	public static function setUmamiCode ( string $umamiCode, string $umamiEndpoint = "https://analytics.umami.is/script.js", string $location = "header" ) {
 		LayoutManager::addScriptInline($location, implode(";", [
 			"var script = document.createElement('script')",
 			"script.async = true",
 			"script.dataset.websiteId = '".htmlspecialchars($umamiCode)."'",
-			"script.src='https://analytics.umami.is/script.js'",
+			"script.src='".addslashes($umamiEndpoint)."'",
 			"document.getElementsByTagName('head')[0].appendChild(script)"
 		]));
 	}
