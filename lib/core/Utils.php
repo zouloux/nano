@@ -93,7 +93,7 @@ class Utils {
 	 *
 	 * @return void|null
 	 */
-	static function dotAdd( array|null &$array, string $path, int|float|string|array $value )
+	static function dotAdd ( array|null &$array, string $path, int|float|string|array $value )
 	{
 		// Check if our object is null
 		if ( is_null( $array ) )

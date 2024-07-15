@@ -1,8 +1,10 @@
 <?php
 
-namespace Nano\helpers;
+namespace Nano\core;
 
-class URL {
+
+class URL
+{
 
 	/**
 	 * Removes the URL scheme (including '://') from a given URL string.
@@ -12,10 +14,11 @@ class URL {
 	 *
 	 * @return string The URL without the scheme.
 	 */
-	static function removeSchemeFromHref ( string $href ): string {
+	static function removeSchemeFromHref ( string $href ): string
+	{
 		return (
-			stripos( $href, '://' ) === false ? $href
-			: substr( $href, stripos( $href, '://' ) + 3, strlen( $href ) )
+			stripos($href, '://') === false ? $href
+			: substr($href, stripos($href, '://') + 3, strlen($href))
 		);
 	}
 
@@ -28,12 +31,12 @@ class URL {
 	 *
 	 * @return string The URL with the base removed.
 	 */
-	static function removeBaseFromHref ( string $href, string $base ) : string
+	static function removeBaseFromHref ( string $href, string $base ): string
 	{
-		$href = self::removeSchemeFromHref( $href );
-		$base = self::removeSchemeFromHref( $base );
-		if ( stripos( $href, $base ) !== false )
-			return substr( $href, stripos( $href, '/', strlen( $base ) ) );
+		$href = self::removeSchemeFromHref($href);
+		$base = self::removeSchemeFromHref($base);
+		if ( stripos($href, $base) !== false )
+			return substr($href, stripos($href, '/', strlen($base)));
 		else
 			return $href;
 	}
@@ -46,13 +49,13 @@ class URL {
 	 *
 	 * @return string The protocol and host part of the given URL.
 	 */
-	static function extractHost ( string $href ) : string
+	static function extractHost ( string $href ): string
 	{
-		if ( stripos( $href, '://' ) === false )
+		if ( stripos($href, '://') === false )
 			return $href;
-		$split = explode( "/", $href, 4 );
-		if ( count( $split ) >= 4 )
-			array_pop( $split );
-		return implode( "/", $split );
+		$split = explode("/", $href, 4);
+		if ( count($split) >= 4 )
+			array_pop($split);
+		return implode("/", $split);
 	}
 }
