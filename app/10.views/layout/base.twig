@@ -1,0 +1,12 @@
+<html {{ layoutHTMLAttributes() }}>
+<head>
+    {{ layoutMetaTags() }}
+    {{ layoutAssetTags("top", "styles") }}
+    {{ layoutAssetTags("top", "scripts") }}
+    {{ layoutAssetTags("header", "styles") }}
+    {{ layoutAssetTags("header", "scripts") }}
+</head>
+{% include 'layout/body.twig' with { content : block('content') } %}
+{{ layoutAssetTags("footer", "styles") }}
+{{ layoutAssetTags("footer", "scripts") }}
+</html>

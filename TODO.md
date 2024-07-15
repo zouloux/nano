@@ -1,5 +1,14 @@
 # TODO
 
+- Template error with NANO_DEBUG ( not found and syntax errors )
+- Include EmailServer ( as EmailHelper ? ) with some examples ( template and layout )
+- Twig cache for even faster responses
+
+
+# OLD OLD V2
+# OLD OLD V2
+# OLD OLD V2
+
 ## Nano V2
 
 > Huge refacto, we split everything appart

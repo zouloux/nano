@@ -3,21 +3,18 @@
 	"description": "Nanoscopic PHP Framework.",
 	"license": "MIT",
 	"type": "framework",
-	"version": "1.4.4",
+	"version": "2.0.0",
 	"keywords": [
 		"framework",
-		"php",
-		"controller",
-		"view",
-		"routing"
+		"php"
 	],
 	"autoload": {
 		"psr-4": {
-			"Nano\\core\\": "core",
-			"Nano\\helpers\\": "helpers",
-			"Nano\\renderers\\" : "renderers",
-			"Nano\\debug\\" : "debug",
-			"App\\helpers\\": "helpers"
+			"Nano\\core\\": "lib/core",
+			"Nano\\data\\": "lib/data",
+			"Nano\\helpers\\": "lib/helpers",
+			"Nano\\debug\\" : "lib/debug",
+			"Nano\\templates\\" : "lib/templates"
 		}
 	},
 	"authors": [
@@ -26,11 +23,10 @@
 		}
 	],
 	"require": {
-		"php": "^8.0",
-		"cocur/slugify": "^v4.1.0",
-		"colinodell/json5": "^v2.2.2",
-		"m1/env": "^2.2.0",
-		"symfony/var-dumper": "v6.0.6",
-		"pecee/simple-router": "^5.3.0"
+		"php": "^8.3",
+		"cocur/slugify": "^v4.5.1",
+		"symfony/var-dumper": "^v7.1.2",
+		"vlucas/phpdotenv": "^v5.6.0",
+		"pecee/simple-router": "^5.4.1"
 	}
 }
