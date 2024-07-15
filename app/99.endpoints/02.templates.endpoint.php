@@ -8,7 +8,7 @@ SimpleRouter::get('*', function ($path) {
 });
 
 SimpleRouter::get("/", function () {
-	return TemplateRenderer::render("templates/home", [
+	TemplateRenderer::render("templates/home", [
 		"content" => "Var from data",
 	]);
 });

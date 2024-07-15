@@ -53,7 +53,8 @@ class Loader
 	{
 		if ( !defined('NANO_WORDPRESS_PATH') )
 			throw new Exception("Loader::loadWordpress // NANO_WORDPRESS_PATH not defined");
-		Env::safeDefine( 'WP_USE_THEMES', false );
+		if ( !defined('WP_USE_THEMES') )
+			define( 'WP_USE_THEMES', false );
 		require_once NANO_WORDPRESS_PATH.'/wp-load.php';
 	}
 }

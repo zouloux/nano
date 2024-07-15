@@ -95,12 +95,13 @@ class TemplateRenderer {
 	 *                               Ex : "pages/login"
 	 *                               $templateName will be sanitized.
 	 * @param array $vars Vars to give to template along with App::$globalVars.
+	 * @param bool $returns Set to true to return and not echo the stream
 	 * @return array|false|mixed|string|string[]|null
 	 * @throws \Twig\Error\LoaderError
 	 * @throws \Twig\Error\RuntimeError
 	 * @throws \Twig\Error\SyntaxError
 	 */
-	public static function render ( string $templateName, array $vars = [] ) {
+	public static function render ( string $templateName, array $vars = [], bool $returns = false ) {
 		// Inject template name
 		$vars['templateName'] = $templateName;
 		// Inject back current theme variables
@@ -126,7 +127,11 @@ class TemplateRenderer {
 		// Render with twig and filter it
 		$stream = $template->render( self::$__themeVariables );
 		$profiling();
-		return self::filterCapturedStream( $stream );
+		$stream = self::filterCapturedStream( $stream );
+		if ( $returns )
+			return $stream;
+		print $stream;
+		exit;
 	}
 
 	// Filter stream with AppController and minify it if needed

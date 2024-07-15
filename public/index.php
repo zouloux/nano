@@ -4,6 +4,7 @@
 // Init envs
 use Nano\core\App;
 use Nano\debug\Debug;
+use Nano\templates\TemplateRenderer;
 
 require_once __DIR__.'/init.php';
 
@@ -18,7 +19,7 @@ App::onNotFound(function ($path) {
 		App::jsonNotFound();
 	}
 	else {
-		dump("Not found template");
+		TemplateRenderer::render("templates/not-found");
 	}
 });
 
