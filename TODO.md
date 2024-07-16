@@ -3,7 +3,7 @@
 - Template error with NANO_DEBUG ( not found and syntax errors )
 - Include EmailServer ( as EmailHelper ? ) with some examples ( template and layout )
 - Twig cache for even faster responses
-
+- Base is not working, declared routes with SimpleRouter does not have the base
 
 # OLD OLD V2
 # OLD OLD V2

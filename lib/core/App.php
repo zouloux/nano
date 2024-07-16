@@ -46,6 +46,10 @@ class App
 		return self::$__clientIP;
 	}
 
+	public static function getAbsolutePath ( string $subPath = "" ) {
+		return self::getScheme().'://'.self::getHost().rtrim(self::getBase(), '/').'/'.ltrim($subPath, '/');
+	}
+
 	public static function initHTTP ( string $base = null ) {
 		if ( isset(self::$__base) )
 			throw new Exception("App::initHTTPEnv // Cannot init http env twice.");
@@ -115,24 +119,43 @@ class App
 
 	// ------------------------------------------------------------------------- ERRORS
 
-	public static $__notFoundHandlers = [];
+	public static $__notFoundPrefixAndHandlers = [];
 	public static $__internalErrorHandlers = [];
 
 	protected static function dispatchError ( string $type, Exception $error ) {
 		$request = SimpleRouter::request();
 		$path = $request->getUrl()->getPath();
-		if ( $type === "not-found" )
-			array_map( fn ($f) => $f( $path, $request, $error ), self::$__notFoundHandlers );
+		if ( $type === "not-found" ) {
+			// Browser handlers and their prefixes
+			$defaultHandler = null;
+			foreach ( self::$__notFoundPrefixAndHandlers as $prefixAndHandler ) {
+				// If this is the default prefix,
+				// store the associated handler to call it if no specific handler has been found
+				if ( $prefixAndHandler[0] === "/" ) {
+					$defaultHandler = $prefixAndHandler[1];
+				}
+				// Check if this non-default prefix matches the path
+				else if ( str_starts_with($path, $prefixAndHandler[0]) ) {
+					// Call this specific handler and cancel the default one
+					$defaultHandler = null;
+					$prefixAndHandler[1]( $request, $error );
+				}
+			}
+			// Call the default handler if we didn't find any specific one before
+			if ( !is_null($defaultHandler) )
+				$defaultHandler( $request, $error );
+		}
+		// Other errors
 		else
 			array_map( fn ($f) => $f( $type, $request, $error ), self::$__internalErrorHandlers );
 	}
 
 	/**
-	 * @param callable(string $path, Request $request, Exception $error): void $callback
+	 * @param callable(Request $request, Exception $error): void $callback
 	 * @return void
 	 */
-	public static function onNotFound ( Callable $callback ) {
-		self::$__notFoundHandlers[] = $callback;
+	public static function onNotFound ( string $prefix, Callable $callback ) {
+		self::$__notFoundPrefixAndHandlers[] = [$prefix, $callback];
 	}
 
 	/**
