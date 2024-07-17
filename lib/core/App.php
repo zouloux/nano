@@ -261,4 +261,37 @@ class App
 	}
 
 	// -------------------------------------------------------------------------
+
+	/**
+	 * Get client 2 chars locale code from http headers ( $_SERVER['HTTP_ACCEPT_LANGUAGE'] )
+	 * @param array $allowedLocales List of allowed locales ( 2 chars, lower ) -> ["en", "fr"]
+	 * @param string|null $defaultLocale Default locale -> "en". If null, will use first of allowed locales list.
+	 * @return string
+	 */
+	static function getClientLocale ( array $allowedLocales, string $defaultLocale = null ) {
+		$defaultLocale ??= $allowedLocales[0];
+		$locale = $defaultLocale;
+		if ( !isset($_SERVER["HTTP_ACCEPT_LANGUAGE"]) )
+			return $locale;
+		// Get user locale
+		$browserLocale = strtolower( substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) );
+		if ( in_array($browserLocale, $allowedLocales) )
+			$locale = $browserLocale;
+		return $locale;
+	}
+
+	/**
+	 * Verify if a locale is valid, otherwise redirect to client's locale.
+	 * @param string $locale Locale to check.
+	 * @param array $allowedLocales List of allowed locales ( 2 chars, lower ) -> ["en", "fr"]
+	 * @param string|null $defaultLocale Default locale -> "en". If null, will use first of allowed locales list.
+	 * @return void
+	 */
+	static function verifyLocaleAndRedirect ( string $locale, array $allowedLocales, string $defaultLocale = null ) {
+		if ( empty($locale) || !in_array($locale, $allowedLocales) ) {
+			$userLocale = App::getClientLocale( $allowedLocales, $defaultLocale );
+			App::redirect("/$userLocale");
+			exit;
+		}
+	}
 }
