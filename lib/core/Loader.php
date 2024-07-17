@@ -46,11 +46,14 @@ class Loader
 	/**
 	 * Load Wordpress into Nano application.
 	 * Use only if you need to access any Wordpress resource or Class.
+	 * @param string|null $locale Load wp-multilang with a specific runtime locale
 	 * @return void
 	 * @throws Exception
 	 */
-	public static function loadWordpress ()
+	public static function loadWordpress ( string $locale = null )
 	{
+		global $__woolkitLocale;
+		$__woolkitLocale = $locale;
 		if ( !defined('NANO_WORDPRESS_PATH') )
 			throw new Exception("Loader::loadWordpress // NANO_WORDPRESS_PATH not defined");
 		if ( !defined('WP_USE_THEMES') )
