@@ -25,7 +25,7 @@ class Debug
 	{
 		// Start application profiling
 		Debug::profile("App", true);
-		
+
 		if ( Env::get('NANO_DEBUG_BAR') ) {
 			// Listen for debug bar assets and expose them to browser
 			SimpleRouter::get('/assets/debug-bar', function ( $match ) {

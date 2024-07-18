@@ -3,6 +3,7 @@
 namespace Nano\helpers;
 
 use Exception;
+use Nano\core\Env;
 
 class Cache {
 
@@ -22,11 +23,12 @@ class Cache {
 	 * @throws Exception
 	 */
 	public static function init ( string $cacheMethod, string $cachePath = null ) {
+		if ( Env::get('NANO_DISABLE_CACHE', false) === true ) {
+			self::$__cacheMethod = "none";
+			return;
+		}
 		// Check cache path directory
-		if (
-			( $cacheMethod === "file" || $cacheMethod === "auto" )
-			&& ( is_null($cachePath) || !is_dir($cachePath) )
-		) {
+		if ( ( $cacheMethod === "file" || $cacheMethod === "auto" ) && ( is_null($cachePath) ) ) {
 			throw new \Exception("Cache::init // Invalid cache path $cachePath");
 		}
 		// Disable cache feature but keep api working
@@ -43,6 +45,7 @@ class Cache {
 		}
 		// Init cache directory for file cache
 		if ( self::$__cacheMethod === "file" ) {
+			self::$__cachePath = $cachePath;
 			self::cacheInitDirectory();
 		}
 	}
@@ -69,7 +72,7 @@ class Cache {
 	 * Get a file cache file path from its key.
 	 */
 	protected static function cacheGetFilePath ( $key ) {
-		return self::$__cachePath.md5($key);
+		return rtrim(self::$__cachePath).'/'.md5($key);
 	}
 
 	/**
