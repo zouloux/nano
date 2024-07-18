@@ -20,7 +20,7 @@ class TemplateRenderer {
 		self::$__templateRootPath = $templateRootPath;
 		self::$__loader = new FilesystemLoader( self::$__templateRootPath );
 		self::$__environment = new Environment( self::$__loader, [
-			'cache' => is_null($cachePath) || Env::get('NANO_DEBUG') ? false : $cachePath,
+			'cache' => is_null($cachePath) || Env::get('NANO_DISABLE_TEMPLATE_CACHE') ? false : $cachePath,
 			'auto_reload' => true,
 			'debug' => false,
 		]);
