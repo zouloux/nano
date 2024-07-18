@@ -117,13 +117,23 @@ class TemplateRenderer {
 		try {
 			$template = self::$__environment->load( $templateName.'.twig');
 		}
+		// TODO
 		catch ( \Exception $e ) {
-			// TODO
+			dump("TEMPLATE NOT FOUND");
 			dump($e);
-			dd("TEMPLATE ERROR");
+			exit;
 		}
 		// Render with twig and filter it
-		$stream = $template->render( self::$__themeVariables );
+		try {
+			$stream = $template->render( self::$__themeVariables );
+		}
+		// TODO
+		catch ( \Exception $e ) {
+			dump("TEMPLATE ERROR");
+			dump($e);
+			exit;
+		}
+		// Render with twig and filter it
 		$profiling();
 		$stream = self::filterCapturedStream( $stream );
 		if ( $returns )
