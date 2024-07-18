@@ -3,6 +3,7 @@
 namespace Nano\core;
 
 use Exception;
+use Nano\debug\Debug;
 
 class Loader
 {
@@ -43,21 +44,28 @@ class Loader
 		}
 	}
 
+	protected static $__wordpressLoaded = false;
+
 	/**
 	 * Load Wordpress into Nano application.
 	 * Use only if you need to access any Wordpress resource or Class.
-	 * @param string|null $locale Load wp-multilang with a specific runtime locale
-	 * @return void
+	 * @return bool
 	 * @throws Exception
 	 */
-	public static function loadWordpress ( string $locale = null )
+	public static function loadWordpress ()
 	{
-		global $__woolkitLocale;
-		$__woolkitLocale = $locale;
+		// Start only once, silently fail if already started
+		if ( self::$__wordpressLoaded )
+			return false;
+		self::$__wordpressLoaded = true;
+		// Need wordpress path
 		if ( !defined('NANO_WORDPRESS_PATH') )
 			throw new Exception("Loader::loadWordpress // NANO_WORDPRESS_PATH not defined");
 		if ( !defined('WP_USE_THEMES') )
 			define( 'WP_USE_THEMES', false );
+		$profile = Debug::profile("Loading wordpress");
 		require_once NANO_WORDPRESS_PATH.'/wp-load.php';
+		$profile();
+		return true;
 	}
 }

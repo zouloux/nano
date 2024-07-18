@@ -17,7 +17,6 @@ class TemplateRenderer {
 	protected static Environment $__environment;
 
 	static function init ( string $templateRootPath, string $cachePath = null ) {
-		$profiling = Debug::profile("Init rendering layer");
 		self::$__templateRootPath = $templateRootPath;
 		self::$__loader = new FilesystemLoader( self::$__templateRootPath );
 		self::$__environment = new Environment( self::$__loader, [
@@ -26,7 +25,6 @@ class TemplateRenderer {
 			'debug' => false,
 		]);
 		TwigHelpers::injectHelpers( self::$__environment );
-		$profiling();
 	}
 
 	// -------------------------------------------------------------------------

@@ -112,7 +112,7 @@ class App
 	// ------------------------------------------------------------------------- LOAD APP FILES
 
 	public static function load () {
-		$profile = Debug::profile("Load", true);
+		$profile = Debug::profile("Loading application functions", true);
 		Loader::loadFunctions( self::$appPath, self::$appExcludePath );
 		$profile();
 	}
