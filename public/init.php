@@ -30,6 +30,9 @@ App::$appPath = realpath( $rootPath.'/app' );
 // to be also accessible in public directory.
 App::$dataPath = realpath( $rootPath.'/data' );
 
+// Path to public directory
+App::$publicPath = realpath( $rootPath.'/public' );
+
 // Paths to exclude from app imports
 App::$appExcludePath = [ "10.views", "20.emails" ];
 

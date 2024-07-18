@@ -329,8 +329,7 @@ class LayoutManager
 		// Use vite built assets
 		else {
 			// Load manifest json file into assets directory
-			//$path = Nano::path($assetsPath, 'manifest', 'json');
-			$path = rtrim($assetsPath, '/').'/manifest.json'; // fixme ?
+			$path = App::$publicPath.rtrim($assetsPath, '/').'/.vite/manifest.json';
 			$manifest = FileSystem::readJSON( $path );
 			if ( is_null($manifest) )
 				return;
@@ -539,21 +538,19 @@ class LayoutManager
 		// Get config from .env
 		$viteProxy = !!Env::get("NANO_VITE_PROXY", false);
 		$assetsPath = App::getBase().$assetsDirectory;
-		// Read cache buster version
-//		Nano::loadAppData("version", "version", "txt", "0");
-//		$cacheBuster = Nano::getAppData("version");
-		$cacheBuster = "0"; // fixme
 		// Inject assets
 		self::addViteAssets(
 			$viteProxy,
 			// No style to load with the proxy, because index.ts(x) loads the index.less
 			$indexScript, $viteProxy ? false : $indexStyle,
-			$assetsPath, $cacheBuster,
+			$assetsPath, self::$cacheBuster,
 			// Place assets in footer because we have a pre-loader
 			'footer', $styleLocation
 		);
 		return $viteProxy;
 	}
+
+	public static $cacheBuster = "0";
 
 	// ------------------------------------------------------------------------- UMAMI
 

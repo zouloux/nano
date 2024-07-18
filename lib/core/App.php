@@ -22,6 +22,7 @@ class App
 	public static string $rootPath = "";
 	public static string $appPath = "";
 	public static string $dataPath = "";
+	public static string $publicPath = "";
 
 	public static array $appExcludePath = [];
 
