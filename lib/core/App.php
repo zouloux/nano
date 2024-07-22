@@ -291,7 +291,7 @@ class App
 	static function verifyLocaleAndRedirect ( string $locale, array $allowedLocales, string $defaultLocale = null ) {
 		if ( empty($locale) || !in_array($locale, $allowedLocales) ) {
 			$userLocale = App::getClientLocale( $allowedLocales, $defaultLocale );
-			App::redirect("/$userLocale");
+			App::redirect("/$userLocale/");
 			exit;
 		}
 	}
