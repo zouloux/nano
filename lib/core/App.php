@@ -171,15 +171,9 @@ class App
 	// ------------------------------------------------------------------------- RUN
 
 	public static function run () {
-//		SimpleRouter::error( function ( Request $request, Exception $error ) {
-//			$type = $error->getCode() === 404 ? "not-found" : "error";
-//			self::dispatchError($type, $error);
-//		});
 		$profile = Debug::profile("Responder");
 		try {
-			$r = SimpleRouter::start();
-			if ( is_null($r) )
-				self::dispatchError("not-found", new Exception("not-found", 404));
+			SimpleRouter::start();
 		} catch ( NotFoundHttpException $error ) {
 			self::dispatchError("not-found", $error);
 		} catch ( TokenMismatchException $error ) {
@@ -250,10 +244,6 @@ class App
 		self::jsonThen( $output, $then, $code );
 	}
 
-	static function jsonNotFound () {
-		self::jsonError( 404, 'not found' );
-	}
-
 	static function input () {
 		$request = SimpleRouter::request();
 		return $request->getInputHandler();
@@ -261,6 +251,14 @@ class App
 
 	static function redirect ( string $url, int $code = 302 ) {
 		header( 'Location: ' . $url, true, $code );
+	}
+	
+	// -------------------------------------------------------------------------
+
+	static function notFound ( Exception $error = null ) {
+		if ( is_null($error) )
+			$error = new Exception("not-found", 404);
+		self::dispatchError("not-found", $error);
 	}
 
 	// -------------------------------------------------------------------------

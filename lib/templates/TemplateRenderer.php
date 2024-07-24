@@ -7,6 +7,7 @@ use Nano\core\Utils;
 use Nano\debug\Debug;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
+use Pecee\SimpleRouter\SimpleRouter;
 
 class TemplateRenderer {
 
@@ -93,14 +94,19 @@ class TemplateRenderer {
 	 *                               Ex : "pages/login"
 	 *                               $templateName will be sanitized.
 	 * @param array $vars Vars to give to template along with App::$globalVars.
-	 * @param bool $returns Set to true to return and not echo the stream
-	 * @param bool $injectDebug Allow debug script injection
+	 * @param array $options ["return" => false, "debug" => true, "code" => 200]
 	 * @return array|false|mixed|string|string[]|null
 	 * @throws \Twig\Error\LoaderError
 	 * @throws \Twig\Error\RuntimeError
 	 * @throws \Twig\Error\SyntaxError
 	 */
-	public static function render ( string $templateName, array $vars = [], bool $returns = false, bool $injectDebug = true ) {
+	public static function render ( string $templateName, array $vars = [], array $options = [] ) {
+		$options = [
+			"return" => false,
+			"debug" => true,
+			"code" => 200,
+			...$options,
+		];
 		// Inject template name
 		$vars['templateName'] = $templateName;
 		// Inject back current theme variables
@@ -113,6 +119,8 @@ class TemplateRenderer {
 			if ( is_array($r) )
 				$vars = $r;
 		}
+		// Set HTTP status
+		SimpleRouter::response()->httpCode( $options['code'] );
 		// Load template
 		$profiling = Debug::profile("Rendering template $templateName");
 		try {
@@ -136,8 +144,8 @@ class TemplateRenderer {
 		}
 		// Render with twig and filter it
 		$profiling();
-		$stream = self::filterCapturedStream( $stream, $injectDebug );
-		if ( $returns )
+		$stream = self::filterCapturedStream( $stream, $options['debug'] );
+		if ( $options['return'] )
 			return $stream;
 		print $stream;
 		exit;
