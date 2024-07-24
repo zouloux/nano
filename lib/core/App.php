@@ -177,7 +177,9 @@ class App
 //		});
 		$profile = Debug::profile("Responder");
 		try {
-			SimpleRouter::start();
+			$r = SimpleRouter::start();
+			if ( is_null($r) )
+				self::dispatchError("not-found", new Exception("not-found", 404));
 		} catch ( NotFoundHttpException $error ) {
 			self::dispatchError("not-found", $error);
 		} catch ( TokenMismatchException $error ) {

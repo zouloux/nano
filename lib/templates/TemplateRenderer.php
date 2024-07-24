@@ -94,12 +94,13 @@ class TemplateRenderer {
 	 *                               $templateName will be sanitized.
 	 * @param array $vars Vars to give to template along with App::$globalVars.
 	 * @param bool $returns Set to true to return and not echo the stream
+	 * @param bool $injectDebug Allow debug script injection
 	 * @return array|false|mixed|string|string[]|null
 	 * @throws \Twig\Error\LoaderError
 	 * @throws \Twig\Error\RuntimeError
 	 * @throws \Twig\Error\SyntaxError
 	 */
-	public static function render ( string $templateName, array $vars = [], bool $returns = false ) {
+	public static function render ( string $templateName, array $vars = [], bool $returns = false, bool $injectDebug = true ) {
 		// Inject template name
 		$vars['templateName'] = $templateName;
 		// Inject back current theme variables
@@ -135,7 +136,7 @@ class TemplateRenderer {
 		}
 		// Render with twig and filter it
 		$profiling();
-		$stream = self::filterCapturedStream( $stream );
+		$stream = self::filterCapturedStream( $stream, $injectDebug );
 		if ( $returns )
 			return $stream;
 		print $stream;
@@ -143,17 +144,17 @@ class TemplateRenderer {
 	}
 
 	// Filter stream with AppController and minify it if needed
-	protected static function filterCapturedStream ( string $stream ) {
+	protected static function filterCapturedStream ( string $stream, bool $injectDebug = true ) {
 		$profiling = Debug::profile("Filter captured stream");
 		// Call middleware and filter captured stream
 		foreach ( self::$__processRenderStreamHandlers as $handler )
-			$stream = $handler( $stream );
+			$stream = $handler( $stream, $injectDebug );
 		// Minify output if configured in env
 		if ( Env::get("NANO_MINIFY_OUTPUT") )
 			$stream = Utils::minifyHTML( $stream );
 		// Inject debugger
 		$profiling();
-		if ( Env::get("NANO_DEBUG") && Env::get("NANO_DEBUG_BAR", true) )
+		if ( $injectDebug && Env::get("NANO_DEBUG") && Env::get("NANO_DEBUG_BAR", true) )
 			$stream .= Debug::render();
 		return $stream;
 	}
