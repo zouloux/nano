@@ -252,7 +252,7 @@ class App
 	static function redirect ( string $url, int $code = 302 ) {
 		header( 'Location: ' . $url, true, $code );
 	}
-	
+
 	// -------------------------------------------------------------------------
 
 	static function notFound ( Exception $error = null ) {

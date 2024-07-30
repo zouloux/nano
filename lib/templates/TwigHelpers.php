@@ -13,6 +13,18 @@ use Twig\TwigFilter;
 use Twig\TwigFunction;
 use Twig\TwigTest;
 
+function _twigSplitter_renderSplitterPart ( $part, $tag, $className, $spanInSpan = false, $insertIndexCssVar = false, $index = 0 ) {
+	$output = "<$tag class=\"$className\"";
+	if ( $insertIndexCssVar )
+		$output .= " style=\"--index: $index\"";
+	$output .= ">";
+	if ($spanInSpan) $output .= '<span>';
+	$output .= $part;
+	if ($spanInSpan) $output .= '</span>';
+	return $output."</$tag>";
+}
+
+
 class TwigHelpers
 {
 	public static function injectHelpers ( Environment $twig ) {
@@ -131,15 +143,7 @@ class TwigHelpers
 		);
 		// --------------------------------------------------------------------- SPLIT TEXT
 		$twig->addFilter(
-			new TwigFilter( 'splitter', function ( $string, $type = 'br', $tag = 'span', $spanInSpan = false, $className = '', $insertBreaks = true ) {
-
-				function twigSplitter_renderSplitterPart ( $part, $tag, $className, $spanInSpan = false ) {
-					$output = "<$tag class=\"$className\">";
-					if ($spanInSpan) $output .= '<span>';
-					$output .= $part;
-					if ($spanInSpan) $output .= '</span>';
-					return $output."</$tag>";
-				}
+			new TwigFilter( 'splitter', function ( $string, $type = 'br', $tag = 'span', $spanInSpan = false, $className = '', $insertIndexCssVar = false, $insertBreaks = true ) {
 
 				$string = str_replace("\r\n", "\n", $string);
 				$string = str_replace('<br>', '<br/>', $string);
@@ -153,16 +157,17 @@ class TwigHelpers
 					throw new \Exception("Invalid splitter type$type.");
 
 				$outputLines = [];
+				$index = 0;
 				foreach ( $lines as $line ) {
 					if ( $type == 'word' ) {
 						$words = explode(' ', $line);
 						$line = '';
 						foreach ( $words as $word )
-							$line .= twigSplitter_renderSplitterPart( $word, $tag, $className, $spanInSpan );
+							$line .= _twigSplitter_renderSplitterPart( $word, $tag, $className, $spanInSpan, $insertIndexCssVar, $index++ );
 						$outputLines[] = $line;
 					}
 					else
-						$outputLines[] = twigSplitter_renderSplitterPart( $line, $tag, $className, $spanInSpan);
+						$outputLines[] = _twigSplitter_renderSplitterPart( $line, $tag, $className, $spanInSpan, $insertIndexCssVar, $index++);
 				}
 
 				return implode( $insertBreaks ? "<br/>" : '', $outputLines );
