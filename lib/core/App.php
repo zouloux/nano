@@ -6,6 +6,7 @@ use Exception;
 use Nano\debug\Debug;
 use Pecee\Http\Middleware\Exceptions\TokenMismatchException;
 use Pecee\Http\Request;
+use Pecee\Http\Response;
 use Pecee\SimpleRouter\Event\EventArgument;
 use Pecee\SimpleRouter\Exceptions\HttpException;
 use Pecee\SimpleRouter\Exceptions\NotFoundHttpException;
@@ -251,6 +252,69 @@ class App
 
 	static function redirect ( string $url, int $code = 302 ) {
 		header( 'Location: ' . $url, true, $code );
+	}
+
+	static function text ( string|array $lines, int $code = 200, Response $response = null, string $contentType = "text/plain" ) {
+		$response ??= SimpleRouter::response();
+		$response->httpCode( $code );
+		$response->header("Content-Type: $contentType; charset=utf-8");
+		print (is_array($lines) ? implode("\n", $lines) : $lines);
+	}
+
+	static function xml ( string|array $lines, int $code = 200, Response $response = null, string $contentType = "application/xml" ) {
+		$response ??= SimpleRouter::response();
+		$response->httpCode( $code );
+		$response->header("Content-Type: $contentType; charset=utf-8");
+		print (is_array($lines) ? implode("\n", $lines) : $lines);
+	}
+
+	// -------------------------------------------------------------------------
+
+	static function printRobots ( array $allow = ['*'], array $disallow = [], string $sitemap = 'sitemap.xml' ) {
+		$lines = [
+			"User-agent: *"
+		];
+		foreach ( $allow as $a )
+			$lines[] = 'Allow: '.$a;
+		foreach ( $disallow as $d )
+			$lines[] = 'Disallow: '.$d;
+		if ( !empty($sitemap) )
+			$lines[] = "Sitemap: ".App::getAbsolutePath($sitemap);
+		App::text( $lines );
+	}
+
+	static function printSitemapRedirect ( array $sitemaps ) {
+		$lines = [
+			'<?xml version="1.0" encoding="UTF-8"?>',
+			'<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+		];
+		foreach ( $sitemaps as $sitemap ) {
+			$lines[] = '<sitemap>';
+			$lines[] = "<loc>$sitemap</loc>";
+			$lines[] = '</sitemap>';
+		}
+		$lines[] = '</sitemapindex>';
+		App::xml( $lines );
+	}
+
+	static function printSitemapPages ( array $pages ) {
+		$lines = [
+			'<?xml version="1.0" encoding="UTF-8"?>',
+			'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+		];
+		foreach ( $pages as $page ) {
+			$lines[] = '<url>';
+			$lines[] = '	<loc>'.$page['href'].'</loc>';
+			if ( !empty($page['priority']) )
+				$lines[] = '	<priority>'.$page['priority'].'</priority>';
+			if ( !empty($page['date']) )
+				$lines[] = '	<lastmod>'.(date('c', $page['date'])).'</lastmod>';
+			if ( !empty($page['frequency']) )
+				$lines[] = '	<changefreq>'.$page['frequency'].'</changefreq>';
+			$lines[] = '</url>';
+		}
+		$lines[] = '</urlset>';
+		App::xml( $lines );
 	}
 
 	// -------------------------------------------------------------------------
