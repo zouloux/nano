@@ -64,11 +64,25 @@ class TemplateRenderer {
 			Utils::dotSet( self::$__themeVariables, $key, $value );
 	}
 
+	// ------------------------------------------------------------------------- THEME HANDLERS
+
+	protected static array $__themeHandlers = [];
+
+	public static function addThemeHandler ( string $name, callable $handler ) {
+		self::$__themeHandlers[ $name ] = $handler;
+	}
+
+	public static function callThemeHandler ( string $name, ...$arguments ) {
+		$handlers = self::$__themeHandlers;
+		if ( !isset($handlers[$name]) )
+			throw new \Exception("TemplateRenderer::callThemeHandler // Handler $name does not exist.");
+		return $handlers[$name](...$arguments);
+	}
+
 	// ------------------------------------------------------------------------- CALLBACKS
 
 	protected static array $__beforeViewHandlers = [];
 	protected static array $__processRenderStreamHandlers = [];
-
 
 	public static function onBeforeView ( Callable $handler ) {
 		self::$__beforeViewHandlers[] = $handler;

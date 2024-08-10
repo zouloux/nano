@@ -84,13 +84,16 @@ class TwigHelpers
 			})
 		);
 		/**
-		 * ACTION
+		 * HANDLER
 		 * ------
-		 * TODO
+		 * Call a handler which has been declared with TemplateRenderer::addThemeHandler
+		 * Ex : TemplateRenderer::addThemeHandler("test", function ($a, $b) { return $a + $b })
+		 * In twig : {{ handler('test', 1, 2) }}
+		 * Will print "3"
 		 */
 		$twig->addFunction(
-			new TwigFunction( 'action', function (string $name, array $arguments = []) {
-
+			new TwigFunction( 'handler', function (string $name, ...$arguments) {
+				return TemplateRenderer::callThemeHandler( $name, ...$arguments );
 			})
 		);
 		/**
