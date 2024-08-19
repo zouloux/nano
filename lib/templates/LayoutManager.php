@@ -6,6 +6,7 @@ use Nano\core\App;
 use Nano\core\Env;
 use Nano\core\Utils;
 use Nano\helpers\FileSystem;
+use Pecee\SimpleRouter\SimpleRouter;
 
 class LayoutManager
 {
@@ -288,6 +289,30 @@ class LayoutManager
 	 */
 	public static function getAssets () {
 		return self::$__assets;
+	}
+
+	public static function autoViteProxy (
+		string $viteScheme = "http",
+		string $assetsDirectory = "assets/",
+		int $vitePort = 5173,
+	) {
+		// Get config from .env
+		$viteProxy = !!Env::get("NANO_VITE_PROXY", false);
+		if ( !$viteProxy )
+			return;
+		$assetsPath = App::getBase().$assetsDirectory;
+		// Enable proxy for style resources ( map /assets to the equivalent vite server port )
+		SimpleRouter::get('/assets/{path}', function ( string $path = "" ) use ($viteScheme, $assetsPath, $vitePort) {
+			$abs = $viteScheme.'://'.App::getHost().':'.$vitePort.$assetsPath.$path;
+			try {
+				print @file_get_contents($abs);
+				exit;
+			}
+			catch ( \Exception $e ) {
+				print "Not found";
+				SimpleRouter::response()->httpCode(404);
+			}
+		}, App::ROUTE_PARAMETER_WITH_SLASHES);
 	}
 
 	/**
