@@ -10,7 +10,7 @@ App::onNotFound("/", function () {
 });
 
 // Start vite assets proxy in dev mode
-//LayoutManager::autoViteProxy();
+//LayoutManager::autoViteRedirect();
 
 SimpleRouter::get("/", function () {
 	TemplateRenderer::render("templates/home", [

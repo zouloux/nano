@@ -291,7 +291,16 @@ class LayoutManager
 		return self::$__assets;
 	}
 
-	public static function autoViteProxy (
+	/**
+	 * Redirect assets request to vite server.
+	 * Will use the current app host and add the vite dev port.
+	 * Only for dev mode with NANO_VITE_PROXY, in production this behavior is disabled.
+	 * @param string $assetsDirectory
+	 * @param string $viteScheme
+	 * @param int $vitePort
+	 * @return void
+	 */
+	public static function autoViteRedirect (
 		string $assetsDirectory = "assets/",
 		string $viteScheme = "http",
 		int $vitePort = 5173,
@@ -301,17 +310,10 @@ class LayoutManager
 		if ( !$viteProxy )
 			return;
 		$assetsPath = App::getBase().$assetsDirectory;
-		// Enable proxy for style resources ( map /assets to the equivalent vite server port )
+		// Enable redirect for style resources ( map /assets to the equivalent vite server port )
 		SimpleRouter::get('/assets/{path}', function ( string $path = "" ) use ($viteScheme, $assetsPath, $vitePort) {
 			$abs = $viteScheme.'://'.App::getHost().':'.$vitePort.$assetsPath.$path;
-			try {
-				print @file_get_contents($abs);
-				exit;
-			}
-			catch ( \Exception $e ) {
-				print "Not found";
-				SimpleRouter::response()->httpCode(404);
-			}
+			SimpleRouter::response()->redirect( $abs, 302);
 		}, App::ROUTE_PARAMETER_WITH_SLASHES);
 	}
 
