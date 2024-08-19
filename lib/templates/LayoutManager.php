@@ -292,8 +292,8 @@ class LayoutManager
 	}
 
 	public static function autoViteProxy (
-		string $viteScheme = "http",
 		string $assetsDirectory = "assets/",
+		string $viteScheme = "http",
 		int $vitePort = 5173,
 	) {
 		// Get config from .env
@@ -336,14 +336,16 @@ class LayoutManager
 		string $assetsPath = "assets/",
 		string $cacheBusterSuffix = "",
 		string $scriptLocation = "footer",
-		string $styleLocation = "header"
+		string $styleLocation = "header",
+		int $vitePort = 5173,
+		string $viteScheme = "http"
 	) {
 		// If we need to use vite proxy
 		if ( $viteProxy ) {
 			// Get default vite proxy
 			$viteProxy = (
 			( $viteProxy === true || strtolower($viteProxy) == "true" || $viteProxy == "1" )
-				? "http://".$_SERVER["HTTP_HOST"].":5173/"
+				? $viteScheme."://".$_SERVER["HTTP_HOST"].":".$vitePort."/"
 				: rtrim($viteProxy, "/")."/"
 			);
 			// Set assets to proxy vite dev server
