@@ -36,7 +36,7 @@ class URL
 		$href = self::removeSchemeFromHref($href);
 		$base = self::removeSchemeFromHref($base);
 		if ( stripos($href, $base) !== false )
-			return substr($href, stripos($href, '/', strlen($base)));
+			return substr($href, stripos($href, '/', strlen($base) - 1));
 		else
 			return $href;
 	}
