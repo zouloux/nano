@@ -90,7 +90,7 @@ class App
 		else
 			self::$__scheme = 'http';
 		// Override server https value
-		$_SERVER['HTTPS'] = self::$__scheme ? 'on' : 'off';
+		$_SERVER['HTTPS'] = self::$__scheme === 'https' ? 'on' : 'off';
 		// --- HOST
 		if ( Env::exists("NANO_APP_HOST") )
 			self::$__host = NANO_APP_HOST;
