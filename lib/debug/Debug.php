@@ -64,10 +64,6 @@ class Debug
 
 	protected static array $__profiles = [];
 
-	public static function getProfiles () {
-		return self::$__profiles;
-	}
-
 	static public function profile ( string $name, bool $forceProfiling = false )
 	{
 		// If not profiling, return a noop to avoid calling undefined
@@ -91,6 +87,15 @@ class Debug
 			return null;
 		self::$__profiles[ $name ][1] = microtime( true );
 	}
+
+	static public function profileStopAllAndGet () {
+		// Stop application total profiling
+		Debug::profileStop("App");
+		Debug::profileStop("Responder");
+		// Return profile
+		return self::$__profiles;
+	}
+
 
 	// ------------------------------------------------------------------------- ADD CUSTOM TAB
 
@@ -125,8 +130,7 @@ class Debug
 
 	static public function render () {
 		// Stop application total profiling
-		Debug::profileStop("App");
-		Debug::profileStop("Responder");
+		$profiles = Debug::profileStopAllAndGet();
 		// Init var dumper as string output
 		Debug::$__dumper = new HtmlDumper();
 		Debug::$__cloner = new VarCloner();
@@ -187,10 +191,10 @@ class Debug
 		// Profiling
 		if ( Env::get("NANO_PROFILE", false) ) {
 			$profileBuffer = "<div class='DebugBar_profiling'>";
-			$appStartReference = self::$__profiles['App'][0];
-			$appEndReference = self::$__profiles['App'][1];
+			$appStartReference = $profiles['App'][0];
+			$appEndReference = $profiles['App'][1];
 			$appDurationReference = $appEndReference - $appStartReference;
-			foreach ( self::$__profiles as $key => $profile ) {
+			foreach ( $profiles as $key => $profile ) {
 				$start = max($profile[0], $appStartReference);
 				$duration = ($profile[1] ?? $appEndReference) - $start;
 				$width = $duration / $appDurationReference * 100;
