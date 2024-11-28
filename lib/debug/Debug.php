@@ -64,6 +64,10 @@ class Debug
 
 	protected static array $__profiles = [];
 
+	public static function getProfiles () {
+		return self::$__profiles;
+	}
+
 	static public function profile ( string $name, bool $forceProfiling = false )
 	{
 		// If not profiling, return a noop to avoid calling undefined
