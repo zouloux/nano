@@ -81,9 +81,13 @@ class App
 			self::$__scheme = NANO_APP_SCHEME;
 		else if ( isset($_SERVER['https']) && $_SERVER['https'] == 'on' )
 			self::$__scheme = 'https';
+		// https with nginx reverse proxy
 		else if ( isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' )
 			self::$__scheme = 'https';
 		else if ( isset($_SERVER['HTTP_X_FORWARDED_PORT']) && $_SERVER['HTTP_X_FORWARDED_PORT'] == '443' )
+			self::$__scheme = 'https';
+		// https with cloudfront
+		else if ( isset($_SERVER['HTTP_CLOUDFRONT_FORWARDED_PROTO']) && $_SERVER['HTTP_CLOUDFRONT_FORWARDED_PROTO'] == 'https' )
 			self::$__scheme = 'https';
 		else if ( isset($_SERVER['REQUEST_SCHEME']) )
 			self::$__scheme = $_SERVER['REQUEST_SCHEME'];
