@@ -198,8 +198,26 @@ class App
 
 	const ROUTE_PARAMETER_WITH_SLASHES = [ 'defaultParameterRegex' => '[\w\-\/\.]+' ];
 
+	protected static array $__injectedProfile;
+
+	static function injectProfileInJSON ( string $jsonKey = "__profile", string $log = "" ) {
+		if ( !Env::get('NANO_PROFILE', false) )
+			return;
+		$profiles = Debug::profileStopAllAndGet();
+		if ( !empty($log) ) {
+			$p2 = [];
+			foreach ( $profiles as $key => $profile )
+				$p2[$key] = round(($profile[1] - $profile[0]) * 10000) / 10;
+			error_log(time()." - [".$log."] - ".json_encode($p2));
+		}
+		self::$__injectedProfile = [ $jsonKey => $profiles ];
+	}
+
 	static function json ( mixed $data, int $status = 200, $options = 0, $depth = 512, callable|null $then = null )
 	{
+		if ( is_array($data) && isset(self::$__injectedProfile) ) {
+			$data = [ ...$data, ...self::$__injectedProfile];
+		}
 		SimpleRouter::response()->httpCode( $status );
 		SimpleRouter::response()->header( 'Content-Type: application/json; charset=utf-8' );
 		print json_encode( $data, $options, $depth );

@@ -108,6 +108,7 @@ class Env
 				"# Auto-generated file, do not modify. Delete this file to re-generated keys.",
 				...$output
 			]);
+      mkdir( dirname( $filePath ), 0777, true );
 			file_put_contents( $filePath, $buffer );
 		}
 		self::loadDotEnvFile( $directory, $fileName );
