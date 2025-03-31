@@ -4,6 +4,7 @@ namespace Nano\core;
 
 use Exception;
 use Nano\debug\Debug;
+use Pecee\Http\Input\InputHandler;
 use Pecee\Http\Middleware\Exceptions\TokenMismatchException;
 use Pecee\Http\Request;
 use Pecee\Http\Response;
@@ -13,12 +14,13 @@ use Pecee\SimpleRouter\Exceptions\NotFoundHttpException;
 use Pecee\SimpleRouter\Handlers\EventHandler;
 use Pecee\SimpleRouter\Route\IGroupRoute;
 use Pecee\SimpleRouter\Route\ILoadableRoute;
+use Pecee\SimpleRouter\Router;
 use Pecee\SimpleRouter\SimpleRouter;
 
 
 class App
 {
-	// ------------------------------------------------------------------------- PATH CONFIG
+	// --------------------------------------------------------------------------- PATH CONFIG
 
 	public static string $rootPath = "";
 	public static string $appPath = "";
@@ -27,8 +29,7 @@ class App
 
 	public static array $appExcludePath = [];
 
-
-	// ------------------------------------------------------------------------- HTTP ENV
+	// --------------------------------------------------------------------------- HTTP ENV
 
 	protected static string $__scheme;
 	protected static string $__host;
@@ -78,7 +79,7 @@ class App
 		}
 		// --- SCHEME
 		if ( Env::exists("NANO_APP_SCHEME") )
-			self::$__scheme = NANO_APP_SCHEME;
+			self::$__scheme = Env::get("NANO_APP_SCHEME");
 		else if ( isset($_SERVER['https']) && $_SERVER['https'] == 'on' )
 			self::$__scheme = 'https';
 		// https with nginx reverse proxy
@@ -97,7 +98,7 @@ class App
 		$_SERVER['HTTPS'] = self::$__scheme === 'https' ? 'on' : 'off';
 		// --- HOST
 		if ( Env::exists("NANO_APP_HOST") )
-			self::$__host = NANO_APP_HOST;
+			self::$__host = Env::get("NANO_APP_HOST");
 		else if ( isset($_SERVER['HTTP_X_FORWARDED_HOST']) )
 			self::$__host = $_SERVER['HTTP_X_FORWARDED_HOST'];
 		else if ( isset($_SERVER['HTTP_HOST']) )
@@ -115,18 +116,18 @@ class App
 			self::$__clientIP = '0.0.0.0';
 	}
 
-	// ------------------------------------------------------------------------- LOAD APP FILES
+	// --------------------------------------------------------------------------- LOAD APP FILES
 
-	public static function load () {
+	public static function load (): void {
 		$profile = Debug::profile("Loading application functions", true);
 		Loader::loadFunctions( self::$appPath, self::$appExcludePath );
 		$profile();
 	}
 
-	// ------------------------------------------------------------------------- ERRORS
+	// --------------------------------------------------------------------------- ERRORS
 
-	public static $__notFoundPrefixAndHandlers = [];
-	public static $__internalErrorHandlers = [];
+	public static array $__notFoundPrefixAndHandlers = [];
+	public static array $__internalErrorHandlers = [];
 
 	protected static function dispatchError ( string $type, Exception $error ) {
 		$request = SimpleRouter::request();
@@ -156,6 +157,12 @@ class App
 			array_map( fn ($f) => $f( $type, $request, $error ), self::$__internalErrorHandlers );
 	}
 
+	static function dispatchNotFound ( Exception $error = null ) {
+		if ( is_null($error) )
+			$error = new Exception("not-found", 404);
+		self::dispatchError("not-found", $error);
+	}
+
 	/**
 	 * @param callable(Request $request, Exception $error): void $callback
 	 * @return void
@@ -172,8 +179,7 @@ class App
 		self::$__internalErrorHandlers[] = $callback;
 	}
 
-
-	// ------------------------------------------------------------------------- RUN
+	// --------------------------------------------------------------------------- RUN
 
 	public static function run () {
 		$profile = Debug::profile("Responder");
@@ -193,10 +199,9 @@ class App
 		}
 	}
 
-	// -------------------------------------------------------------------------
+	// --------------------------------------------------------------------------- RESPONSE
 
-
-	const ROUTE_PARAMETER_WITH_SLASHES = [ 'defaultParameterRegex' => '[\w\-\/\.]+' ];
+	const array ROUTE_PARAMETER_WITH_SLASHES = [ 'defaultParameterRegex' => '[\w\-\/\.]+' ];
 
 	protected static array $__injectedProfile;
 
@@ -267,11 +272,6 @@ class App
 		self::jsonThen( $output, $then, $code );
 	}
 
-	static function input () {
-		$request = SimpleRouter::request();
-		return $request->getInputHandler();
-	}
-
 	static function redirect ( string $url, int $code = 302 ) {
 		header( 'Location: ' . $url, true, $code );
 	}
@@ -290,7 +290,7 @@ class App
 		print (is_array($lines) ? implode("\n", $lines) : $lines);
 	}
 
-	// -------------------------------------------------------------------------
+	// --------------------------------------------------------------------------- ROBOTS / SITEMAP
 
 	static function printRobots ( array $allow = [], array $disallow = [], string $sitemap = 'sitemap.xml' ) {
 		$lines = [ "User-agent: *" ];
@@ -347,28 +347,63 @@ class App
 		App::xml( $lines );
 	}
 
-	// -------------------------------------------------------------------------
+	// --------------------------------------------------------------------------- SIMPLE ROUTER
 
-	static function notFound ( Exception $error = null ) {
-		if ( is_null($error) )
-			$error = new Exception("not-found", 404);
-		self::dispatchError("not-found", $error);
-	}
+  public static function getRouter () : Router {
+    return SimpleRouter::router();
+  }
 
-	// -------------------------------------------------------------------------
+  public static function getRouterRequest () : Request {
+    return SimpleRouter::request();
+  }
 
-	/**
-	 * Get client 2 chars locale code from http headers ( $_SERVER['HTTP_ACCEPT_LANGUAGE'] )
-	 * @param array $allowedLocales List of allowed locales ( 2 chars, lower ) -> ["en", "fr"]
-	 * @param string|null $defaultLocale Default locale -> "en". If null, will use first of allowed locales list.
-	 * @return string
-	 */
-	static function getClientLocale ( array $allowedLocales, string $defaultLocale = null ) {
+  public static function getRouterInput () : InputHandler {
+    return self::getRouterRequest()->getInputHandler();
+  }
+
+  public static function getCurrentURL () : \Pecee\Http\Url {
+    return self::getRouter()->getUrl();
+  }
+
+	// --------------------------------------------------------------------------- LOCALE
+
+  protected static array $__locales = [];
+  public static function getLocales () : array { return self::$__locales; }
+
+  /**
+   * Set locales with format ["en" => "English", "fr" => "Français"]
+   * @param array $locales
+   * @return void
+   */
+  public static function setLocales ( array $locales ) {
+    self::$__locales = $locales;
+  }
+
+  /**
+   * Get client 2 chars locale code from http headers ( $_SERVER['HTTP_ACCEPT_LANGUAGE'] )
+   * And from ?locale get parameters.
+   *
+   * @param array|null $allowedLocales List of allowed locales ( 2 chars, lower ) -> ["en", "fr"], will use app locales keys if null.
+   * @param string|null $defaultLocale If null, will use first of allowed locales list.
+   *
+   * @see self::setLocales()
+   * @see self::getLocales()
+   *
+   * @return string
+   */
+	static function getClientLocale ( array $allowedLocales = null, string $defaultLocale = null ) {
+    if ( is_null($defaultLocale) )
+      $allowedLocales = array_keys(self::getLocales());
+    // Locale from get parameters
+    $getLocale = self::getRouterInput()->get("locale", "");
+    if ( !empty($getLocale) && in_array($getLocale, $allowedLocales) )
+      return $getLocale;
+    // Default locale if not available in browser header
 		$defaultLocale ??= $allowedLocales[0];
 		$locale = $defaultLocale;
 		if ( !isset($_SERVER["HTTP_ACCEPT_LANGUAGE"]) )
 			return $locale;
-		// Get user locale
+		// Get user locale from browser header
 		$browserLocale = strtolower( substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2) );
 		if ( in_array($browserLocale, $allowedLocales) )
 			$locale = $browserLocale;
@@ -377,16 +412,31 @@ class App
 
 	/**
 	 * Verify if a locale is valid, otherwise redirect to client's locale.
-	 * @param string $locale Locale to check.
-	 * @param array $allowedLocales List of allowed locales ( 2 chars, lower ) -> ["en", "fr"]
+	 *
+	 * @param string $urlLocale Locale to check.
+	 * @param array|null $allowedLocales List of allowed locales ( 2 chars, lower ) -> ["en", "fr"]
 	 * @param string|null $defaultLocale Default locale -> "en". If null, will use first of allowed locales list.
+	 *
 	 * @return void
 	 */
-	static function verifyLocaleAndRedirect ( string $locale, array $allowedLocales, string $defaultLocale = null ) {
-		if ( empty($locale) || !in_array($locale, $allowedLocales) ) {
-			$userLocale = App::getClientLocale( $allowedLocales, $defaultLocale );
-			App::redirect("/$userLocale/");
-			exit;
-		}
+	static function verifyLocaleAndRedirect ( string $urlLocale, array $allowedLocales = null, string $defaultLocale = null ) : void {
+    // Default parameters from locale config
+    $allowedLocales ??= array_keys(self::getLocales());
+    $defaultLocale ??= array_keys(self::getLocales())[0];
+    // User locale is valid
+		if ( !empty( $urlLocale) && in_array( $urlLocale, $allowedLocales) )
+      return;
+    // Get user locale from request
+    $userLocale = App::getClientLocale( $allowedLocales, $defaultLocale );
+    // Extract path parts
+    $path = self::getCurrentURL()->getPath();
+    $pathParts = explode("/", $path, 3);
+    // Check if first part looks like a locale to include or exclude it from redirection
+    if ( strlen($pathParts[1] ?? "") === 2 )
+      $path = strtolower($pathParts[2] ?? "");
+    $path = ltrim($path, "/");
+    $redirect = "/$userLocale/$path";
+    App::redirect($redirect);
+    exit;
 	}
 }
