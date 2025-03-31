@@ -292,16 +292,24 @@ class App
 
 	// -------------------------------------------------------------------------
 
-	static function printRobots ( array $allow = ['*'], array $disallow = [], string $sitemap = 'sitemap.xml' ) {
-		$lines = [
-			"User-agent: *"
-		];
+	static function printRobots ( array $allow = [], array $disallow = [], string $sitemap = 'sitemap.xml' ) {
+		$lines = [ "User-agent: *" ];
+    $envRobots = Env::get('NANO_ROBOTS', "");
+    if ( $envRobots === "public" ) {
+      $allow = ["*", ...$allow];
+      $disallow = ["", ...$disallow];
+    } else if ( $envRobots === "private" ) {
+      $disallow = ["/", ...$disallow];
+      $sitemap = "";
+    }
 		foreach ( $allow as $a )
 			$lines[] = 'Allow: '.$a;
 		foreach ( $disallow as $d )
 			$lines[] = 'Disallow: '.$d;
-		if ( !empty($sitemap) )
+		if ( !empty($sitemap) ) {
+      $lines[] = "";
 			$lines[] = "Sitemap: ".App::getAbsolutePath($sitemap);
+    }
 		App::text( $lines );
 	}
 
