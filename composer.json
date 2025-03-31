@@ -3,7 +3,7 @@
 	"description": "Nanoscopic PHP Framework.",
 	"license": "MIT",
 	"type": "framework",
-	"version": "2.4.0",
+	"version": "2.4.1",
 	"keywords": [
 		"framework",
 		"php"

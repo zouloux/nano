@@ -10,7 +10,7 @@ use Pecee\SimpleRouter\SimpleRouter;
 
 class LayoutManager
 {
-	// ------------------------------------------------------------------------- CHARSET
+	// --------------------------------------------------------------------------- CHARSET
 
 	const CHARSET_UTF8 = "utf-8";
 
@@ -22,7 +22,7 @@ class LayoutManager
 		self::$__charset = $charset;
 	}
 
-	// ------------------------------------------------------------------------- HTML LANG
+	// --------------------------------------------------------------------------- HTML LANG
 
 	protected static string $__htmlLang = "";
 	public static function getHTMLLang () {
@@ -32,7 +32,7 @@ class LayoutManager
 		self::$__htmlLang = $htmlLang;
 	}
 
-	// ------------------------------------------------------------------------- HTML CLASSES
+	// --------------------------------------------------------------------------- HTML CLASSES
 
 	protected static array $__htmlClasses = [];
 	public static function getHTMLClasses () {
@@ -45,7 +45,7 @@ class LayoutManager
 		self::$__htmlClasses[] = $htmlClass;
 	}
 
-	// ------------------------------------------------------------------------- VIEWPORT
+	// --------------------------------------------------------------------------- VIEWPORT
 
 	const VIEWPORT_FIXED = "width=device-width, initial-scale=1";
 	const VIEWPORT_FIXED_NO_SCALE = "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=0";
@@ -58,7 +58,7 @@ class LayoutManager
 		self::$__viewport = $viewport;
 	}
 
-	// ------------------------------------------------------------------------- META DATA
+	// --------------------------------------------------------------------------- META DATA
 
 	protected static array $__metaData = [];
 	public static function getMetaData () {
@@ -92,7 +92,7 @@ class LayoutManager
 			self::$__metaData[$key] = $metaData[$key];
 	}
 
-	// ------------------------------------------------------------------------- VIEWPORT
+	// --------------------------------------------------------------------------- VIEWPORT
 
 	protected static string $__title = "";
 	public static function getTitle () {
@@ -101,16 +101,18 @@ class LayoutManager
 
 	/**
 	 * Set title tag.
-	 * @param string $pageTitle Current page title.
-	 * @param string $siteName Site name, if you need to template it. To disable templating, send null.
+	 * @param string|null $pageTitle Current page title.
+	 * @param string|null $siteName Site name, if you need to template it. To disable templating, send null.
 	 * @param string $titleTemplate Use this template to combine site name and page name
 	 * @return void
 	 */
-	public static function setTitle ( $pageTitle, $siteName = null, $titleTemplate = "{{site}} - {{page}}") {
+	public static function setTitle ( string $pageTitle = null, string $siteName = null, string $titleTemplate = "{{site}} - {{page}}") {
 		// No site name, no templating
 		if ( is_null($siteName) )
-			self::$__title = $siteName;
-
+			self::$__title = $pageTitle;
+    // No title, no templating
+    else if ( is_null($pageTitle) )
+      self::$__title = $siteName;
 		// Generate page title from site name and template
 		else {
 			self::$__title = Utils::stache($titleTemplate, [
@@ -120,7 +122,7 @@ class LayoutManager
 		}
 	}
 
-	// ------------------------------------------------------------------------- ICONS
+	// --------------------------------------------------------------------------- ICONS
 
 	protected static array $__icons = [ null, null ];
 	public static function getIcons () {
@@ -137,7 +139,7 @@ class LayoutManager
 		self::$__icons = [ $icon32, $icon1024 ];
 	}
 
-	// ------------------------------------------------------------------------- APP
+	// --------------------------------------------------------------------------- APP
 
 	protected static $__appTheme = [];
 	public static function getAppTheme () {
@@ -159,7 +161,7 @@ class LayoutManager
 		];
 	}
 
-	// ------------------------------------------------------------------------- FONT PRELOAD
+	// --------------------------------------------------------------------------- FONT PRELOAD
 
 	protected static array $__fontPreloads = [];
 
@@ -172,7 +174,14 @@ class LayoutManager
 		self::$__fontPreloads[] = $path;
 	}
 
-	// ------------------------------------------------------------------------- RENDER META TAGS
+	// --------------------------------------------------------------------------- RENDER META TAGS
+
+  protected static function fixBasePath ( string $path ) : string {
+    if ( str_starts_with($path, "/") && !str_starts_with($path, "//") )
+      return App::getAbsolutePath( $path );
+    else
+      return $path;
+  }
 
 	/**
 	 * Render all meta tags.
@@ -197,6 +206,9 @@ class LayoutManager
 	 */
 	public static function renderMetaTags ( bool $returnAsArray = false ) {
 		$buffer = [];
+    // Share title and description fallbacks to page title and description
+    $shareTitle = self::$__metaData["shareTitle"] ?? self::$__title ?? "";
+    $shareDescription = self::$__metaData["shareDescription"] ?? self::$__metaData["description"] ?? "";
 		// --- CHARSET
 		if ( self::$__charset )
 			$buffer[] = "<meta charset=\"".htmlspecialchars(self::$__charset)."\" />";
@@ -209,20 +221,20 @@ class LayoutManager
 		if ( isset(self::$__metaData["description"]) && self::$__metaData["description"] )
 			$buffer[] = "<meta name=\"description\" content=\"".htmlspecialchars(self::$__metaData["description"])."\">";
 		// --- OG TITLE
-		if ( isset(self::$__metaData["shareTitle"]) && self::$__metaData["shareTitle"] )
-			$buffer[] = "<meta property=\"og:title\" content=\"".htmlspecialchars(self::$__metaData["shareTitle"])."\" />";
+		if ( !empty($shareTitle) )
+			$buffer[] = "<meta property=\"og:title\" content=\"".htmlspecialchars($shareTitle)."\" />";
 		// --- OG DESCRIPTION
-		if ( isset(self::$__metaData["shareDescription"]) && self::$__metaData["shareDescription"] )
-			$buffer[] = "<meta property=\"og:description\" content=\"".htmlspecialchars(self::$__metaData["shareDescription"])."\" />";
+		if ( !empty($shareDescription) )
+			$buffer[] = "<meta property=\"og:description\" content=\"".htmlspecialchars($shareDescription)."\" />";
 		// --- OG IMAGE
 		if ( isset(self::$__metaData["shareImage"]) && self::$__metaData["shareImage"] )
-			$buffer[] = "<meta property=\"og:image\" content=\"".htmlspecialchars(self::$__metaData["shareImage"])."\" />";
+			$buffer[] = "<meta property=\"og:image\" content=\"".htmlspecialchars(self::fixBasePath(self::$__metaData["shareImage"]))."\" />";
 		// --- FAVICON 32
 		if ( isset(self::$__icons[0]) && self::$__icons[0] )
-			$buffer[] = "<link rel=\"icon\" type=\"image/png\" href=\"".htmlspecialchars(self::$__icons[0])."\" />";
+			$buffer[] = "<link rel=\"icon\" type=\"image/png\" href=\"".htmlspecialchars(self::fixBasePath(self::$__icons[0]))."\" />";
 		// --- ICON 1024
 		if ( isset(self::$__icons[1]) && self::$__icons[1] )
-			$buffer[] = "<link rel=\"apple-touch-icon\" type=\"image/png\" href=\"".htmlspecialchars(self::$__icons[1])."\" />";
+			$buffer[] = "<link rel=\"apple-touch-icon\" type=\"image/png\" href=\"".htmlspecialchars(self::fixBasePath(self::$__icons[1]))."\" />";
 		// --- WEB APP CAPABLE
 		if ( self::$__appTheme )
 			$buffer[] = "<meta name=\"apple-mobile-web-app-capable\" content=\"yes\" />";
@@ -249,13 +261,13 @@ class LayoutManager
 		}
 
 		return (
-		$returnAsArray
+			$returnAsArray
 			? $buffer
 			: implode("\n", $buffer)
 		);
 	}
 
-	// ------------------------------------------------------------------------- RENDER HTML ATTRIBUTES
+	// --------------------------------------------------------------------------- RENDER HTML ATTRIBUTES
 
 	public static function renderHTMLAttributes () {
 		$buffer = [];
@@ -266,7 +278,7 @@ class LayoutManager
 		return implode(" ", $buffer);
 	}
 
-	// ------------------------------------------------------------------------- ASSETS
+	// --------------------------------------------------------------------------- ASSETS
 
 	protected static array $__assets = [
 		"top" => [
@@ -513,7 +525,7 @@ class LayoutManager
 
 	public static $cacheBuster = "0";
 
-	// ------------------------------------------------------------------------- UMAMI
+	// --------------------------------------------------------------------------- UMAMI
 
 	/**
 	 * Add Umami Tracker
