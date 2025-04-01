@@ -264,7 +264,7 @@ class App
 			...$data
 		];
 		if ( !is_null( $error ) ) {
-			$output[ 'error' ] = [
+			$output["error"] = [
 				"code"    => $error->getCode(),
 				"message" => $error->getMessage(),
 			];
@@ -290,8 +290,42 @@ class App
 		print (is_array($lines) ? implode("\n", $lines) : $lines);
 	}
 
+	// --------------------------------------------------------------------------- LOG
+
+	/**
+	 * Print in console to stdout
+	 * @param mixed $data Will be json_encoded if not a string
+	 * @return void
+	 */
+	static function stdout ( mixed $data ) {
+		if ( !is_string( $data ) )
+			$data = json_encode($data);
+		fwrite(fopen('php://stdout', 'w'), $data);
+	}
+
+	/**
+	 * Print in console to stderr
+	 * @param mixed $data Will be json_encoded if not a string
+	 * @return void
+	 */
+	static function stderr ( mixed $data ) {
+		if ( !is_string( $data ) )
+			$data = json_encode($data);
+		error_log(json_encode($data));
+	}
+
 	// --------------------------------------------------------------------------- ROBOTS / SITEMAP
 
+	/**
+	 * Print robots.txt.
+	 * Will read NANO_ROBOTS constant :
+	 * - "public" 	-> allow all, show sitemap
+	 * - "private"	-> disallow all, hide sitemap
+	 * @param array $allow List of URL to allow
+	 * @param array $disallow List of URL to disallow
+	 * @param string $sitemap Print sitemap path
+	 * @return void
+	 */
 	static function printRobots ( array $allow = [], array $disallow = [], string $sitemap = 'sitemap.xml' ) {
 		$lines = [ "User-agent: *" ];
     $envRobots = Env::get('NANO_ROBOTS', "");
@@ -313,6 +347,12 @@ class App
 		App::text( $lines );
 	}
 
+	/**
+	 * Print a sitemap.xml that point to other sitemap.xml endpoints.
+	 * Useful for multi-lang websites.
+	 * @param array $sitemaps List of sitemap URLs
+	 * @return void
+	 */
 	static function printSitemapRedirect ( array $sitemaps ) {
 		$lines = [
 			'<?xml version="1.0" encoding="UTF-8"?>',
@@ -327,6 +367,16 @@ class App
 		App::xml( $lines );
 	}
 
+	/**
+	 * Print a sitemap.xml from page lists.
+	 * Page array structure :
+	 * - href 			-> Complete page href
+	 * - priority		?> From 0.0 to 1.0
+	 * - lastmod  	?> Last modification timestamp
+	 * - frequency	?> Update frequency "always" / "hourly" / "daily" / "weekly" / "monthly" / "yearly" / "never"
+	 * @param array $pages List of page, all in arrays
+	 * @return void
+	 */
 	static function printSitemapPages ( array $pages ) {
 		$lines = [
 			'<?xml version="1.0" encoding="UTF-8"?>',
