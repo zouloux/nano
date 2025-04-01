@@ -10,13 +10,26 @@ use Illuminate\Database\Schema\Blueprint;
 use ReflectionClass;
 use ReflectionProperty;
 
+/**
+ * Use with illuminate/database 12
+ */
 
 abstract class AbstractModel
 {
+	public static function patchLaravelEnv () {
+		// illuminate/database 12 requires this to work
+		if ( function_exists( 'base_path' ) )
+			return;
+		function base_path ( $path = "" ) {
+			return __DIR__.( $path ? DIRECTORY_SEPARATOR.$path : $path );
+		}
+	}
+
 	// ------------------------------------------------------------------------- DB
 
 	public static function initDatabase ( string $sqlitePath, string $modelsDirectory, bool $migrate = false ) : Capsule
 	{
+		self::patchLaravelEnv();
 		// Allow database file in migration phase only
 		if ( $migrate && !file_exists( $sqlitePath ) )
 			touch( $sqlitePath );
