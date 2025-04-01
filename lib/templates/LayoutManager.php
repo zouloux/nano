@@ -378,7 +378,12 @@ class LayoutManager
 			$viteMainStyle !== false && self::addStyleFile($styleLocation, $assetsPath.$manifest[$viteMainStyle]["file"]."?".$cacheBusterSuffix);
 			if ( $viteMainScript !== false ) {
 				// Add main JS module
-				self::addScriptFile($scriptLocation, $assetsPath.$manifest[$viteMainScript]["file"]."?".$cacheBusterSuffix, true, true);
+        $scriptManifest = $manifest[$viteMainScript];
+				self::addScriptFile($scriptLocation, $assetsPath.$scriptManifest["file"]."?".$cacheBusterSuffix, true, true);
+        // Check if this js module generated css files and load them
+        if ( is_array($scriptManifest["css"]) )
+          foreach ( $scriptManifest["css"] as $cssFile )
+            self::addStyleFile($styleLocation, $assetsPath.$cssFile."?".$cacheBusterSuffix);
 				// Get legacy entry points
 				foreach ( $manifest as $key => $entry ) {
 					if ( !isset($entry["isEntry"]) || !$entry["isEntry"] ) continue;
@@ -501,13 +506,13 @@ class LayoutManager
 	 * Will use cache busting from app data file version.txt
 	 * @see LayoutManager::addViteAssets
 	 * @param string $indexScript Index script file name in vite manifest
-	 * @param string $indexStyle Index style file name in vite manifest
+	 * @param string|bool $indexStyle Index style file name in vite manifest
 	 * @param string $assetsDirectory Path to generated assets directory from base.
 	 * @param string $styleLocation Style location
 	 * @return bool Will return true if in dev mode.
 	 * @throws \Exception
 	 */
-	public static function autoAssets ( string $indexScript, string $indexStyle, string $assetsDirectory = "assets/", string $styleLocation = "header" ) {
+	public static function autoAssets ( string $indexScript, string|bool $indexStyle, string $assetsDirectory = "assets/", string $styleLocation = "header" ) {
 		// Get config from .env
 		$viteProxy = !!Env::get("NANO_VITE_PROXY", false);
 		$assetsPath = App::getBase().$assetsDirectory;
