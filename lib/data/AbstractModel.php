@@ -1,6 +1,16 @@
 <?php
 
-namespace Nano\data;
+namespace {
+  // illuminate/database 12 requires this to work
+  if ( !function_exists( 'base_path' ) ) {
+    function base_path ( $path = "" ) {
+      return __DIR__.( $path ? DIRECTORY_SEPARATOR.$path : $path );
+    }
+  }
+}
+
+
+namespace Nano\data { // namespace is wrapped to allow base_path to be global
 
 use Carbon\Carbon;
 use Exception;
@@ -16,20 +26,10 @@ use ReflectionProperty;
 
 abstract class AbstractModel
 {
-	public static function patchLaravelEnv () {
-		// illuminate/database 12 requires this to work
-		if ( function_exists( 'base_path' ) )
-			return;
-		function base_path ( $path = "" ) {
-			return __DIR__.( $path ? DIRECTORY_SEPARATOR.$path : $path );
-		}
-	}
-
 	// ------------------------------------------------------------------------- DB
 
 	public static function initDatabase ( string $sqlitePath, string $modelsDirectory, bool $migrate = false ) : Capsule
 	{
-		self::patchLaravelEnv();
 		// Allow database file in migration phase only
 		if ( $migrate && !file_exists( $sqlitePath ) )
 			touch( $sqlitePath );
@@ -430,4 +430,6 @@ abstract class AbstractModel
 			return false;
 		return static::table()->delete( $this->id );
 	}
+}
+// end of namespace
 }
