@@ -28,8 +28,7 @@ abstract class AbstractModel
 {
 	// ------------------------------------------------------------------------- DB
 
-	public static function initDatabase ( string $sqlitePath, string $modelsDirectory, bool $migrate = false ) : Capsule
-	{
+	public static function initDatabase ( string $sqlitePath, string $modelsDirectory, bool $migrate = false, bool $enableWAL = true ) : Capsule {
 		// Allow database file in migration phase only
 		if ( $migrate && !file_exists( $sqlitePath ) )
 			touch( $sqlitePath );
@@ -40,9 +39,10 @@ abstract class AbstractModel
 			'database' => $sqlitePath,
 		]);
 		$capsule->setAsGlobal();
-		// Enable WAL mode and set synchronous to FULL
+		// Enable WAL mode and set synchronous to FULL for better perfs
 		$connection = $capsule->getConnection();
-		$connection->statement('PRAGMA journal_mode=WAL;');
+		if ( $enableWAL )
+			$connection->statement('PRAGMA journal_mode=WAL;');
 		$connection->statement('PRAGMA synchronous=FULL;');
 		// If we are in migration phase
 		if ( $migrate )
