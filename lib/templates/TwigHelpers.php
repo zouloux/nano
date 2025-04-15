@@ -227,7 +227,7 @@ class TwigHelpers
 			})
 		);
 		$twig->addFilter(
-			new TwigFilter('imageSrc', function ( $image, string|int $size = null ) {
+			new TwigFilter('imageSrc', function ( $image, string|int|null $size = null ) {
 				$image = is_array($image) ? $image : $image->toArray();
 				$formats = browseCompatibleFormats($image['formats']);
 				$nearestFormat = null;
