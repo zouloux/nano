@@ -4,7 +4,7 @@ namespace Nano\helpers;
 
 class FileSystem {
 
-	static function readJSON ( string $path ) {
+	static function readJSON ( string $path ): mixed {
 		$content = file_get_contents( $path );
 		return json_decode( $content, true );
 	}
@@ -18,7 +18,7 @@ class FileSystem {
 	 * @param string $path Absolute path to the folder to scan.
 	 * @param bool $includeHidden Will exclude every file or folder starting with a dot.
 	 */
-	static function listFolder ( string $path, bool $includeHidden = false ) {
+	static function listFolder ( string $path, bool $includeHidden = false ): false|array {
 		$path = rtrim( $path ) . "/";
 		if ( ! file_exists( $path ) ) {
 			return false;
@@ -54,7 +54,7 @@ class FileSystem {
 	 *
 	 * @return false|string Will return false if not found, otherwise will
 	 */
-	static function recursiveSearchRoot ( string $rootPath, string $searchedFile, array $excludedFolders = [] ) {
+	static function recursiveSearchRoot ( string $rootPath, string $searchedFile, array $excludedFolders = [] ): false|string {
 		$files = scandir( $rootPath );
 		foreach ( $files as $file ) {
 			$filePath = rtrim( $rootPath, "/" ) . "/" . $file;
@@ -89,7 +89,7 @@ class FileSystem {
 	 *
 	 * @param string $path Absolute path of directory to remove.
 	 */
-	static function recursiveRemoveDirectory ( string $path ) {
+	static function recursiveRemoveDirectory ( string $path ): void {
 		// TODO : Check if parent of App::root and halt
 		$files = scandir( $path );
 		foreach ( $files as $file ) {
@@ -114,7 +114,7 @@ class FileSystem {
 	 * @param string $from Absolute path from
 	 * @param string $to Absolute path to (directory name included)
 	 */
-	static function copyFolder ( string $from, string $to ) {
+	static function copyFolder ( string $from, string $to ): void {
 		// Clean already existing directory
 		if ( is_dir( $to ) ) {
 			FileSystem::recursiveRemoveDirectory( $to );

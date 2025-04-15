@@ -19,8 +19,7 @@ class Loader
 	 * Will skip files and directories with name starting with an underscore. ex :
 	 * - _skipped.php
 	 */
-	public static function loadFunctions ( string $directory, array $exclude = [] )
-	{
+	public static function loadFunctions ( string $directory, array $exclude = [] ): void {
 		$files = scandir( $directory );
 		foreach ( $files as $file ) {
 			if ( $file == '.' || $file == '..' )
@@ -44,7 +43,7 @@ class Loader
 		}
 	}
 
-	protected static $__wordpressLoaded = false;
+	protected static bool $__wordpressLoaded = false;
 
 	/**
 	 * Load Wordpress into Nano application.
@@ -52,8 +51,7 @@ class Loader
 	 * @return bool
 	 * @throws Exception
 	 */
-	public static function loadWordpress ()
-	{
+	public static function loadWordpress (): bool {
 		// Start only once, silently fail if already started
 		if ( self::$__wordpressLoaded )
 			return false;

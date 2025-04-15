@@ -50,8 +50,7 @@ abstract class AbstractModel
 		return $capsule;
 	}
 
-	protected static function migrateDatabase ( string $modelsDirectory )
-	{
+	protected static function migrateDatabase ( string $modelsDirectory ): void {
 		$files = scandir($modelsDirectory);
 		echo "<pre>";
 		echo "Migrating models in $modelsDirectory<br/>";
@@ -80,20 +79,17 @@ abstract class AbstractModel
 
 	const TABLE_NAME = "";
 
-	protected static function structure ( Blueprint $table )
-	{
+	protected static function structure ( Blueprint $table ) {
 		throw new Exception("AbstractModel::structure // Model structure implementation missing.");
 	}
 
-	protected static function upgrade ( Blueprint $table, int $version ) : bool
-	{
+	protected static function upgrade ( Blueprint $table, int $version ) : bool {
 		return false;
 	}
 
 	protected static function afterUpgrade ( int $version ) {}
 
-	protected static function initTableVersionUpgrade ( string $refererTableName )
-	{
+	protected static function initTableVersionUpgrade ( string $refererTableName ): array {
 		// Create the upgrade table if it does not exist
 		$upgradeTableName = "table_versions";
 		if ( !Capsule::schema()->hasTable( $upgradeTableName ) ) {
@@ -119,8 +115,7 @@ abstract class AbstractModel
 		return [ $upgrade->version ?? 0, $upgradeVersion ];
 	}
 
-	public static function migrate ()
-	{
+	public static function migrate (): void {
 		if ( empty( static::TABLE_NAME ) )
 			throw new Exception("AbstractModel::migrate // Set TABLE_NAME const in model class.");
 		// Create schema only if table does not already exist
@@ -160,16 +155,14 @@ abstract class AbstractModel
 		static::afterUpgrade( $version );
 	}
 
-	public static function table () : Builder
-	{
+	public static function table () : Builder {
 		return Capsule::table( static::TABLE_NAME );
 	}
 
 	// ------------------------------------------------------------------------- DEFAULT HELPERS
 
 
-	public static function getOneWhere ( string $key, mixed $value ) : static|null
-	{
+	public static function getOneWhere ( string $key, mixed $value ) : static|null {
 		$array = static::table()->where( $key, $value )->get()->first();
 		return is_null( $array ) ? null : new static( (array) $array );
 	}
@@ -177,14 +170,12 @@ abstract class AbstractModel
 	/**
 	 * @return static[]
 	 */
-	public static function getAllWhere ( string $key, mixed $value, $orderBy = "updated_at", $direction = "desc" ) : array
-	{
+	public static function getAllWhere ( string $key, mixed $value, $orderBy = "updated_at", $direction = "desc" ) : array {
 		$list = static::table()->where( $key, $value )->orderBy( $orderBy, $direction )->get();
 		return static::convertList( $list );
 	}
 
-	protected static function convertList ( $list )
-	{
+	protected static function convertList ( $list ): array {
 		$output = [];
 		foreach ( $list as $item )
 			$output[] = new static( (array) $item );
@@ -192,16 +183,14 @@ abstract class AbstractModel
 	}
 
 
-	public static function getByID ( int $id ) : static|null
-	{
+	public static function getByID ( int $id ) : static|null {
 		return static::getOneWhere( "id", $id );
 	}
 
 	/**
 	 * @return static[]
 	 */
-	public static function getAll ( $orderBy = "updated_at", $direction = "desc" ) : array
-	{
+	public static function getAll ( $orderBy = "updated_at", $direction = "desc" ) : array {
 		$list = static::table()->orderBy( $orderBy, $direction )->get();
 		return static::convertList( $list );
 	}
@@ -232,8 +221,7 @@ abstract class AbstractModel
 	 * @param array{searchQuery?: string, searchColumns?: string[], exclusiveFilters?: array<string, mixed>, searchExplode?:boolean, pageIndex?: int, pageLength?: int, orderBy?: string, orderDirection?: string} $options The configuration options for pagination and search.*
 	 * @return array Returns an associative array with paginated results and pagination details.
 	 */
-	public static function paginate ( array $options = [] ) : array
-	{
+	public static function paginate ( array $options = [] ) : array {
 		// Merge default options with provided options
 		$options = [
 			"searchQuery" => "",
@@ -289,8 +277,7 @@ abstract class AbstractModel
 
 	protected static $propertyTypesCache = [];
 
-	protected static function listValueObjectProperties ()
-	{
+	protected static function listValueObjectProperties () {
 		// Check if cached value object exists
 		$class = static::class;
 		if ( isset(self::$propertyTypesCache[$class]) )
@@ -316,16 +303,14 @@ abstract class AbstractModel
 
 	// ------------------------------------------------------------------------- CONSTRUCTOR
 
-	public function __construct ( array $from = null )
-	{
+	public function __construct ( ?array $from = null ) {
 		if ( ! is_null( $from ) )
 			$this->inject( $from );
 	}
 
 	// ------------------------------------------------------------------------- ARRAY <=> OBJECT
 
-	public function inject ( array $data ) : void
-	{
+	public function inject ( array $data ) : void {
 		$properties = static::listValueObjectProperties();
 		foreach ( $properties as $name => $type ) {
 			if ( !isset( $data[ $name ] ) )
@@ -364,8 +349,7 @@ abstract class AbstractModel
 
 	// ------------------------------------------------------------------------- SAVE
 
-	public function toArray ( $forDB = false )
-	{
+	public function toArray ( $forDB = false ): array {
 		$properties = static::listValueObjectProperties();
 		$output = [];
 		foreach ( $properties as $name => $type ) {
@@ -381,13 +365,11 @@ abstract class AbstractModel
 		return $output;
 	}
 
-	protected function beforeSave ( array $values ) : array
-	{
+	protected function beforeSave ( array $values ) : array {
 		return $values;
 	}
 
-	public function save () : bool
-	{
+	public function save () : bool {
 		// Convert this value object to array and filter through before save middleware
 		$values = $this->toArray( true );
 		$values = $this->beforeSave( $values );
@@ -424,8 +406,7 @@ abstract class AbstractModel
 		}
 	}
 
-	public function delete () : bool
-	{
+	public function delete () : bool {
 		if ( !isset( $this->id ) )
 			return false;
 		return static::table()->delete( $this->id );

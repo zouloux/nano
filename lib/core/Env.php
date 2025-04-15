@@ -14,8 +14,7 @@ class Env
 	 * @param mixed|null $default Default value used if not found.
 	 * @return mixed
 	 */
-	public static function get ( string $key, mixed $default = null ) : mixed
-	{
+	public static function get ( string $key, mixed $default = null ) : mixed {
 		$value = $_ENV[$key] ?? false;
 		if ( $value === false )
 			return $default;
@@ -36,8 +35,7 @@ class Env
 		return $value;
 	}
 
-	public static function exists ( string $key )
-	{
+	public static function exists ( string $key ): bool {
 		return isset($_ENV[$key]);
 	}
 
@@ -49,8 +47,7 @@ class Env
 	 * @return void
 	 * @throws Exception
 	 */
-	public static function loadDotEnvFile ( string $directory, string $fileName = ".env", bool $throw = true )
-	{
+	public static function loadDotEnvFile ( string $directory, string $fileName = ".env", bool $throw = true ): void {
 		$filePath = rtrim($directory, '/').'/'.$fileName;
 		if ( !file_exists( realpath( $filePath ) ) ) {
 			if ( $throw )
@@ -66,8 +63,7 @@ class Env
 	 * @param array $envList
 	 * @return void
 	 */
-	public static function defineEnvs ( string $forceDotEnvPrefix, array $envList )
-	{
+	public static function defineEnvs ( string $forceDotEnvPrefix, array $envList ): void {
 		foreach ( $envList as $key => $value ) {
 			// Map value to key if we do not have default value
 			$realKey = is_int( $key ) ? $value : $key;
@@ -97,8 +93,7 @@ class Env
 	 * @return void
 	 * @throws \Random\RandomException
 	 */
-	public static function initKeysEnvFile ( string $directory, string $fileName, array $keys )
-	{
+	public static function initKeysEnvFile ( string $directory, string $fileName, array $keys ): void {
 		$filePath = $directory.'/'.$fileName;
 		if ( !file_exists( realpath( $filePath ) ) ) {
 			$output = [];

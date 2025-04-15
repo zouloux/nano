@@ -22,7 +22,7 @@ class Cache {
 	 * @return void
 	 * @throws Exception
 	 */
-	public static function init ( string $cacheMethod, string $cachePath = null ) {
+	public static function init ( string $cacheMethod, ?string $cachePath = null ): void {
 		if ( Env::get('NANO_DISABLE_CACHE', false) === true ) {
 			self::$__cacheMethod = "none";
 			return;
@@ -50,7 +50,7 @@ class Cache {
 		}
 	}
 
-	public static function isActive () {
+	public static function isActive (): bool {
 		return !empty( self::$__cacheMethod );
 	}
 
@@ -63,7 +63,7 @@ class Cache {
 	 * @param $prefix
 	 * @return void
 	 */
-	static function setCachePrefix ( $prefix ) {
+	static function setCachePrefix ( $prefix ): void {
 		self::$__cachePrefix = $prefix;
 	}
 
@@ -71,7 +71,7 @@ class Cache {
 	 * INTERNAL
 	 * Get a file cache file path from its key.
 	 */
-	protected static function cacheGetFilePath ( $key ) {
+	protected static function cacheGetFilePath ( $key ): string {
 		return rtrim(self::$__cachePath).'/'.md5($key);
 	}
 
@@ -79,7 +79,7 @@ class Cache {
 	 * INTERNAL
 	 * Init cache directory for file cache system.
 	 */
-	protected static function cacheInitDirectory () {
+	protected static function cacheInitDirectory (): void {
 		if ( !file_exists(self::$__cachePath) )
 			mkdir( self::$__cachePath, 0777, true );
 	}
@@ -89,7 +89,7 @@ class Cache {
 	 * @return bool
 	 * @throws \Exception
 	 */
-	static function clear () {
+	static function clear (): bool {
 		if ( empty(self::$__cacheMethod) )
 			throw new Exception("Cache::clear // Invalid cache method");
 		if ( self::$__cacheMethod === "apcu" )
@@ -111,7 +111,7 @@ class Cache {
 	 * @return boolean
 	 * @throws \Exception
 	 */
-	static function has ( string $key ) {
+	static function has ( string $key ): bool {
 		if ( empty(self::$__cacheMethod) )
 			throw new Exception("Cache::has // Invalid cache method");
 		$key = self::$__cachePrefix.$key;
@@ -130,7 +130,7 @@ class Cache {
 	 * @return mixed
 	 * @throws \Exception
 	 */
-	static function get ( string $key ) {
+	static function get ( string $key ): mixed {
 		if ( empty(self::$__cacheMethod) )
 			throw new Exception("Cache::get // Invalid cache method");
 		$key = self::$__cachePrefix.$key;
@@ -151,7 +151,7 @@ class Cache {
 	 * @return bool
 	 * @throws \Exception
 	 */
-	static function set ( string $key, mixed $data ) {
+	static function set ( string $key, mixed $data ): bool {
 		if ( empty(self::$__cacheMethod) )
 			throw new Exception("Cache::set // Invalid cache method");
 		$key = self::$__cachePrefix.$key;
@@ -171,12 +171,12 @@ class Cache {
 	 * This value will be cached and will be returned without calling $getHandler again, until cache is cleared.
 	 * @param string $key Cache key, prefixed with cachePrefix.
 	 * @param callable $getHandler Function to return value to cache. Will be called until it returns a value. This value will be stored in cache.
-	 * @param callable $retrieveHandler Called when value is retrieved from cache. TODO : ARGUMENTS
-	 * @param boolean $disableCache Set to true to disable cache, can be useful in some cases where you want the cache to be bypassed and the handler always called.
+	 * @param callable|null $retrieveHandler Called when value is retrieved from cache. TODO : ARGUMENTS
+	 * @param bool $disableCache Set to true to disable cache, can be useful in some cases where you want the cache to be bypassed and the handler always called.
 	 * @return false|mixed
-	 * @throws \Exception
+	 * @throws Exception
 	 */
-	static function define ( $key, $getHandler, $retrieveHandler = null, $disableCache = false ) {
+	static function define ( string $key, callable $getHandler, ?callable $retrieveHandler = null, bool $disableCache = false ): mixed {
 		if ( empty(self::$__cacheMethod) )
 			throw new Exception("Cache::define // Invalid cache method");
 		// Always call handler if cache is disabled
@@ -213,8 +213,7 @@ class Cache {
 	 * Count entries in cache
 	 * @return int|mixed|null
 	 */
-	static function count ()
-	{
+	static function count (): mixed {
 		$isAPCU = self::$__cacheMethod === "apcu";
 		// todo : support other cache methods
 		if ( !$isAPCU )

@@ -36,24 +36,24 @@ class App
 	protected static string $__base;
 	protected static string $__clientIP;
 
-	public static function getScheme () {
+	public static function getScheme (): string {
 		return self::$__scheme;
 	}
-	public static function getHost () {
+	public static function getHost (): string {
 		return self::$__host;
 	}
-	public static function getBase () {
+	public static function getBase (): string {
 		return self::$__base;
 	}
-	public static function getClientIP () {
+	public static function getClientIP (): string {
 		return self::$__clientIP;
 	}
 
-	public static function getAbsolutePath ( string $subPath = "" ) {
+	public static function getAbsolutePath ( string $subPath = "" ): string {
 		return self::getScheme().'://'.self::getHost().rtrim(self::getBase(), '/').'/'.ltrim($subPath, '/');
 	}
 
-	public static function initHTTP ( ?string $base = null ) {
+	public static function initHTTP ( ?string $base = null ): void {
 		if ( isset(self::$__base) )
 			throw new Exception("App::initHTTPEnv // Cannot init http env twice.");
 		// --- BASE
@@ -129,7 +129,7 @@ class App
 	public static array $__notFoundPrefixAndHandlers = [];
 	public static array $__internalErrorHandlers = [];
 
-	protected static function dispatchError ( string $type, Exception $error ) {
+	protected static function dispatchError ( string $type, Exception $error ): void {
 		$request = SimpleRouter::request();
 		$path = $request->getUrl()->getPath();
 		if ( $type === "not-found" ) {
@@ -157,7 +157,7 @@ class App
 			array_map( fn ($f) => $f( $type, $request, $error ), self::$__internalErrorHandlers );
 	}
 
-	static function dispatchNotFound ( ?Exception $error = null ) {
+	static function dispatchNotFound ( ?Exception $error = null ): void {
 		if ( is_null($error) )
 			$error = new Exception("not-found", 404);
 		self::dispatchError("not-found", $error);
@@ -167,7 +167,7 @@ class App
 	 * @param callable(Request $request, Exception $error): void $callback
 	 * @return void
 	 */
-	public static function onNotFound ( string $prefix, Callable $callback ) {
+	public static function onNotFound ( string $prefix, Callable $callback ): void {
 		self::$__notFoundPrefixAndHandlers[] = [$prefix, $callback];
 	}
 
@@ -175,13 +175,13 @@ class App
 	 * @param callable(string $type, Request $request, Exception $error): void $callback
 	 * @return void
 	 */
-	public static function onInternalError ( Callable $callback ) {
+	public static function onInternalError ( Callable $callback ): void {
 		self::$__internalErrorHandlers[] = $callback;
 	}
 
 	// --------------------------------------------------------------------------- RUN
 
-	public static function run () {
+	public static function run (): void {
 		$profile = Debug::profile("Responder");
 		try {
 			SimpleRouter::start();
@@ -205,7 +205,7 @@ class App
 
 	protected static array $__injectedProfile;
 
-	static function injectProfileInJSON ( string $jsonKey = "__profile", string $log = "" ) {
+	static function injectProfileInJSON ( string $jsonKey = "__profile", string $log = "" ): void {
 		if ( !Env::get('NANO_PROFILE', false) )
 			return;
 		$profiles = Debug::profileStopAllAndGet();
@@ -218,11 +218,9 @@ class App
 		self::$__injectedProfile = [ $jsonKey => $profiles ];
 	}
 
-	static function json ( mixed $data, int $status = 200, $options = 0, $depth = 512, ?callable $then = null )
-	{
-		if ( is_array($data) && isset(self::$__injectedProfile) ) {
+	static function json ( mixed $data, int $status = 200, $options = 0, $depth = 512, ?callable $then = null ): void {
+		if ( is_array($data) && isset(self::$__injectedProfile) )
 			$data = [ ...$data, ...self::$__injectedProfile];
-		}
 		SimpleRouter::response()->httpCode( $status );
 		SimpleRouter::response()->header( 'Content-Type: application/json; charset=utf-8' );
 		print json_encode( $data, $options, $depth );
@@ -251,13 +249,11 @@ class App
 		exit;
 	}
 
-	static function jsonThen ( mixed $data, ?callable $callback = null, int $status = 200 )
-	{
+	static function jsonThen ( mixed $data, ?callable $callback = null, int $status = 200 ): void {
 		self::json( $data, $status, JSON_NUMERIC_CHECK, 512, $callback );
 	}
 
-	static function jsonError ( int $code, string $status, array $data = [], ?Exception $error = null, ?callable $then = null )
-	{
+	static function jsonError ( int $code, string $status, array $data = [], ?Exception $error = null, ?callable $then = null ): void {
 		$output = [
 			'code'   => $code,
 			'status' => $status,
@@ -272,18 +268,18 @@ class App
 		self::jsonThen( $output, $then, $code );
 	}
 
-	static function redirect ( string $url, int $code = 302 ) {
+	static function redirect ( string $url, int $code = 302 ): void {
 		header( 'Location: ' . $url, true, $code );
 	}
 
-	static function text ( string|array $lines, int $code = 200, ?Response $response = null, string $contentType = "text/plain" ) {
+	static function text ( string|array $lines, int $code = 200, ?Response $response = null, string $contentType = "text/plain" ): void {
 		$response ??= SimpleRouter::response();
 		$response->httpCode( $code );
 		$response->header("Content-Type: $contentType; charset=utf-8");
 		print (is_array($lines) ? implode("\n", $lines) : $lines);
 	}
 
-	static function xml ( string|array $lines, int $code = 200, ?Response $response = null, string $contentType = "application/xml" ) {
+	static function xml ( string|array $lines, int $code = 200, ?Response $response = null, string $contentType = "application/xml" ): void {
 		$response ??= SimpleRouter::response();
 		$response->httpCode( $code );
 		$response->header("Content-Type: $contentType; charset=utf-8");
@@ -297,7 +293,7 @@ class App
 	 * @param mixed $data Will be json_encoded if not a string
 	 * @return void
 	 */
-	static function stdout ( mixed $data ) {
+	static function stdout ( mixed $data ): void {
 		if ( !is_string( $data ) )
 			$data = json_encode($data);
 		fwrite(fopen('php://stdout', 'w'), $data);
@@ -308,7 +304,7 @@ class App
 	 * @param mixed $data Will be json_encoded if not a string
 	 * @return void
 	 */
-	static function stderr ( mixed $data ) {
+	static function stderr ( mixed $data ): void {
 		if ( !is_string( $data ) )
 			$data = json_encode($data);
 		error_log(json_encode($data));
@@ -326,7 +322,7 @@ class App
 	 * @param string $sitemap Print sitemap path
 	 * @return void
 	 */
-	static function printRobots ( array $allow = [], array $disallow = [], string $sitemap = 'sitemap.xml' ) {
+	static function printRobots ( array $allow = [], array $disallow = [], string $sitemap = 'sitemap.xml' ): void {
 		$lines = [ "User-agent: *" ];
     $envRobots = Env::get('NANO_ROBOTS', "");
     if ( $envRobots === "public" ) {
@@ -353,7 +349,7 @@ class App
 	 * @param array $sitemaps List of sitemap URLs
 	 * @return void
 	 */
-	static function printSitemapRedirect ( array $sitemaps ) {
+	static function printSitemapRedirect ( array $sitemaps ): void {
 		$lines = [
 			'<?xml version="1.0" encoding="UTF-8"?>',
 			'<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
@@ -377,7 +373,7 @@ class App
 	 * @param array $pages List of page, all in arrays
 	 * @return void
 	 */
-	static function printSitemapPages ( array $pages ) {
+	static function printSitemapPages ( array $pages ): void {
 		$lines = [
 			'<?xml version="1.0" encoding="UTF-8"?>',
 			'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
@@ -425,7 +421,7 @@ class App
    * @param array $locales
    * @return void
    */
-  public static function setLocales ( array $locales ) {
+  public static function setLocales ( array $locales ): void {
     self::$__locales = $locales;
   }
 
@@ -441,7 +437,7 @@ class App
    *
    * @return string
    */
-	static function getClientLocale ( ?array $allowedLocales = null, ?string $defaultLocale = null ) {
+	static function getClientLocale ( ?array $allowedLocales = null, ?string $defaultLocale = null ): string {
     if ( is_null($defaultLocale) )
       $allowedLocales = array_keys(self::getLocales());
     // Locale from get parameters

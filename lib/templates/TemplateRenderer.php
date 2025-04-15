@@ -17,7 +17,7 @@ class TemplateRenderer {
 	protected static FilesystemLoader $__loader;
 	protected static Environment $__environment;
 
-	static function init ( string $templateRootPath, string $cachePath = null ) {
+	static function init ( string $templateRootPath, ?string $cachePath = null ) {
 		self::$__templateRootPath = $templateRootPath;
 		self::$__loader = new FilesystemLoader( self::$__templateRootPath );
 		self::$__environment = new Environment( self::$__loader, [
@@ -44,7 +44,7 @@ class TemplateRenderer {
 	/**
 	 * Get theme variables array.
 	 */
-	public static function getThemeVariables ( string $key = null ) {
+	public static function getThemeVariables ( ?string $key = null ) {
 		return (
 			// No key, return root data for current template index
 			is_null( $key ) ? self::$__themeVariables

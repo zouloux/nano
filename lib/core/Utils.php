@@ -14,7 +14,7 @@ class Utils {
 	 * Slugify a string.
 	 * Uses a singleton instance of Cocur\Slugify\Slugify
 	 */
-	static function slugify ( string $string, string $separator = "-" ) {
+	static function slugify ( string $string, string $separator = "-" ): string {
 		self::$__slugifier ??= new Slugify();
 		return self::$__slugifier->slugify( $string, $separator );
 	}
@@ -30,8 +30,7 @@ class Utils {
 	 *
 	 * @return mixed|null value if found, else null.
 	 */
-	static function dotGet ( array|null &$array, string|null $path ) : mixed
-	{
+	static function dotGet ( array|null &$array, string|null $path ) : mixed {
 		// Check if our object is null
 		if ( is_null( $array ) )
 			return null;
@@ -58,13 +57,12 @@ class Utils {
 	 * @param string $path The path to the wanted value to set.
 	 * @param mixed $value The value to set at this path.
 	 *
-	 * @return void|null
+	 * @return void
 	 */
-	static function dotSet ( array|null &$array, string $path, mixed $value )
-	{
+	static function dotSet ( array|null &$array, string $path, mixed $value ) : void {
 		// Check if our object is null
 		if ( is_null( $array ) )
-			return null;
+			return;
 		// Split the first part of the path
 		$explodedPath = explode( '.', $path, 2 );
 		$key          = $explodedPath[ 0 ];
@@ -91,13 +89,12 @@ class Utils {
 	 * @param string $path The path to the wanted value to set.
 	 * @param int|float|string|array $value The value to add at this path.
 	 *
-	 * @return void|null
+	 * @return void
 	 */
-	static function dotAdd ( array|null &$array, string $path, int|float|string|array $value )
-	{
+	static function dotAdd ( array|null &$array, string $path, int|float|string|array $value ): void {
 		// Check if our object is null
 		if ( is_null( $array ) )
-			return null;
+			return;
 		// Split the first part of the path
 		$explodedPath = explode( '.', $path, 2 );
 		$key = $explodedPath[ 0 ];
@@ -144,8 +141,7 @@ class Utils {
 	 *
 	 * @return mixed Templated string.
 	 */
-	static function stache ( string $template, array $values )
-	{
+	static function stache ( string $template, array $values ): mixed {
 		return preg_replace_callback(
 			'/{{([a-zA-Z0-9.\-_]+)}}/',
 			function ( $matches ) use ( $values ) {
@@ -163,8 +159,7 @@ class Utils {
 	 * @param string $string
 	 * @return string
 	 */
-	static function nl2br ( string $string )
-	{
+	static function nl2br ( string $string ): string {
 		return preg_replace('/(?<!\\\)\\n/', '<br>', $string);
 	}
 
@@ -180,8 +175,7 @@ class Utils {
 	 *
 	 * @return array Cleaned options with defaults.
 	 */
-	static function defaultOptions ( array $options, array $defaults )
-	{
+	static function defaultOptions ( array $options, array $defaults ): array {
 		$options = array_merge( $defaults, $options );
 		// Remove null values
 		foreach ( $options as $key => $value )
@@ -197,8 +191,7 @@ class Utils {
 	 * @param string $input
 	 * @return bool
 	 */
-	static function booleanInput ( string $input )
-	{
+	static function booleanInput ( string $input ): bool {
 		return in_array(strtolower($input), ["true", "on", "1"]);
 	}
 
@@ -208,8 +201,7 @@ class Utils {
 	 * Minify html stream with a regex.
 	 * From : https://stackoverflow.com/questions/5312349/minifying-final-html-output-using-regular-expressions-with-codeigniter
 	 */
-	static function minifyHTML ( string $stream )
-	{
+	static function minifyHTML ( string $stream ): array|string {
 		$untouchedStream = $stream;
 		// Remove HTML comments, but not SSI
 		$stream = preg_replace('/<!--[^#](.*?)-->/s', '', $stream);
