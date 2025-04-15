@@ -106,7 +106,7 @@ class LayoutManager
 	 * @param string $titleTemplate Use this template to combine site name and page name
 	 * @return void
 	 */
-	public static function setTitle ( string $pageTitle = null, string $siteName = null, string $titleTemplate = "{{site}} - {{page}}") {
+	public static function setTitle ( ?string $pageTitle = null, ?string $siteName = null, string $titleTemplate = "{{site}} - {{page}}") {
 		// No site name, no templating
 		if ( is_null($siteName) )
 			self::$__title = $pageTitle;
@@ -135,7 +135,7 @@ class LayoutManager
 	 * @param string|null $icon1024 Href to PNG 1024x1024 icon ( mobile browsers )
 	 * @return void
 	 */
-	public static function setIcons ( string $icon32 = null, string $icon1024 = null ) {
+	public static function setIcons ( ?string $icon32 = null, ?string $icon1024 = null ) {
 		self::$__icons = [ $icon32, $icon1024 ];
 	}
 
