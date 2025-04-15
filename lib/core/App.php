@@ -53,7 +53,7 @@ class App
 		return self::getScheme().'://'.self::getHost().rtrim(self::getBase(), '/').'/'.ltrim($subPath, '/');
 	}
 
-	public static function initHTTP ( string $base = null ) {
+	public static function initHTTP ( ?string $base = null ) {
 		if ( isset(self::$__base) )
 			throw new Exception("App::initHTTPEnv // Cannot init http env twice.");
 		// --- BASE
@@ -157,7 +157,7 @@ class App
 			array_map( fn ($f) => $f( $type, $request, $error ), self::$__internalErrorHandlers );
 	}
 
-	static function dispatchNotFound ( Exception $error = null ) {
+	static function dispatchNotFound ( ?Exception $error = null ) {
 		if ( is_null($error) )
 			$error = new Exception("not-found", 404);
 		self::dispatchError("not-found", $error);
@@ -218,7 +218,7 @@ class App
 		self::$__injectedProfile = [ $jsonKey => $profiles ];
 	}
 
-	static function json ( mixed $data, int $status = 200, $options = 0, $depth = 512, callable|null $then = null )
+	static function json ( mixed $data, int $status = 200, $options = 0, $depth = 512, ?callable $then = null )
 	{
 		if ( is_array($data) && isset(self::$__injectedProfile) ) {
 			$data = [ ...$data, ...self::$__injectedProfile];
@@ -251,12 +251,12 @@ class App
 		exit;
 	}
 
-	static function jsonThen ( mixed $data, callable|null $callback = null, int $status = 200 )
+	static function jsonThen ( mixed $data, ?callable $callback = null, int $status = 200 )
 	{
 		self::json( $data, $status, JSON_NUMERIC_CHECK, 512, $callback );
 	}
 
-	static function jsonError ( int $code, string $status, array $data = [], Exception $error = null, callable $then = null )
+	static function jsonError ( int $code, string $status, array $data = [], ?Exception $error = null, ?callable $then = null )
 	{
 		$output = [
 			'code'   => $code,
@@ -276,14 +276,14 @@ class App
 		header( 'Location: ' . $url, true, $code );
 	}
 
-	static function text ( string|array $lines, int $code = 200, Response $response = null, string $contentType = "text/plain" ) {
+	static function text ( string|array $lines, int $code = 200, ?Response $response = null, string $contentType = "text/plain" ) {
 		$response ??= SimpleRouter::response();
 		$response->httpCode( $code );
 		$response->header("Content-Type: $contentType; charset=utf-8");
 		print (is_array($lines) ? implode("\n", $lines) : $lines);
 	}
 
-	static function xml ( string|array $lines, int $code = 200, Response $response = null, string $contentType = "application/xml" ) {
+	static function xml ( string|array $lines, int $code = 200, ?Response $response = null, string $contentType = "application/xml" ) {
 		$response ??= SimpleRouter::response();
 		$response->httpCode( $code );
 		$response->header("Content-Type: $contentType; charset=utf-8");
@@ -441,7 +441,7 @@ class App
    *
    * @return string
    */
-	static function getClientLocale ( array $allowedLocales = null, string $defaultLocale = null ) {
+	static function getClientLocale ( ?array $allowedLocales = null, ?string $defaultLocale = null ) {
     if ( is_null($defaultLocale) )
       $allowedLocales = array_keys(self::getLocales());
     // Locale from get parameters
@@ -469,7 +469,7 @@ class App
 	 *
 	 * @return void
 	 */
-	static function verifyLocaleAndRedirect ( string $urlLocale, array $allowedLocales = null, string $defaultLocale = null ) : void {
+	static function verifyLocaleAndRedirect ( string $urlLocale, ?array $allowedLocales = null, ?string $defaultLocale = null ) : void {
     // Default parameters from locale config
     $allowedLocales ??= array_keys(self::getLocales());
     $defaultLocale ??= array_keys(self::getLocales())[0];
