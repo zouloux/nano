@@ -53,7 +53,7 @@ class App
 		return self::getScheme().'://'.self::getHost().rtrim(self::getBase(), '/').'/'.ltrim($subPath, '/');
 	}
 
-	public static function initHTTP ( ?string $base = null ): void {
+	public static function initHTTP ( ?string $base = null, bool $unstablePrependBaseToRoutes = false ): void {
 		if ( isset(self::$__base) )
 			throw new Exception("App::initHTTPEnv // Cannot init http env twice.");
 		// --- BASE
@@ -63,7 +63,7 @@ class App
 		if ( !str_starts_with(self::$__base, '/') )
 			throw new Exception("App::initHTTPEnv // Base ($base) have to start with '/'");
 		// Prepend base to router
-		if ( self::$__base !== "/" ) {
+		if ( self::$__base !== "/" && $unstablePrependBaseToRoutes) {
 			$eventHandler = new EventHandler();
 			$eventHandler->register(EventHandler::EVENT_ADD_ROUTE, function( EventArgument $event ) {
 				$base = self::$__base;
