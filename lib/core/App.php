@@ -268,6 +268,15 @@ class App
 		self::jsonThen( $output, $then, $code );
 	}
 
+	static function jsonSuccess ( string $status = "success", array $data = [], ?callable $then = null, int $code = 200 ): void {
+		$output = [
+			'code'   => $code,
+			'status' => $status,
+			...$data
+		];
+		self::jsonThen( $output, $then, $code );
+	}
+
 	static function redirect ( string $url, int $code = 302 ): void {
 		header( 'Location: ' . $url, true, $code );
 	}
