@@ -167,6 +167,14 @@ abstract class AbstractModel
 		return is_null( $array ) ? null : new static( (array) $array );
 	}
 
+	public static function getOneWhereMultiple ( array $where ) : static|null {
+		$table = static::table();
+		foreach ( $where as $key => $value )
+			$table = $table->where( $key, $value );
+		$array = $table->get()->first();
+		return is_null( $array ) ? null : new static( (array) $array );
+	}
+
 	/**
 	 * @return static[]
 	 */
