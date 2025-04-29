@@ -2,6 +2,7 @@
 
 namespace Nano\helpers;
 
+use DOMDocument;
 use Nano\core\Env;
 use Nano\core\Utils;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -208,9 +209,9 @@ class TransactionnalEmails
 	 */
 	static function inlineStyles ( string $htmlContent ) {
 		// Load document
-		$doc = new DOMDocument();
+		$doc = new \DOMDocument();
 		@$doc->loadHTML($htmlContent, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-		$xpath = new DOMXPath($doc);
+		$xpath = new \DOMXPath($doc);
 		// Load first style
 		$styleNode = $xpath->query('//style')->item(0);
 		// No first style, return untouched HTML
