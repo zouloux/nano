@@ -79,16 +79,16 @@ class TransactionnalEmails
 
 	// ------------------------------------------------------------------------- SEND EMAIL
 
-	static function sendEmail ( string $to, string $template, array $vars, bool $debugRender = false ) {
+	static function send ( string $to, string $template, array $vars, bool $debugRender = false ) {
 		if ( !isset(static::$__mailer) || is_null(static::$__mailer) )
-			throw new Exception("EmailService::sendEmail // Not initialized");
+			throw new Exception("EmailService::send // Not initialized");
 		$mailer = static::$__mailer;
 		// Load the template
 		$emailTemplatePath = self::$__templateBase ?? '';
 		$templateFile = $emailTemplatePath . $template . '.email.html';
 		$templateContent = file_get_contents($templateFile);
 		if ( $templateContent === false )
-			throw new Exception('EmailService::sendEmail // Unable to load the template file');
+			throw new Exception('EmailService::send // Unable to load the template file');
 		// Split subject and inject in vars
 		$parts = explode("\n---\n", $templateContent, 2);
 		$subject = Utils::stache($parts[ 0 ], $vars);
@@ -140,7 +140,7 @@ class TransactionnalEmails
 			])
 			),
 		]);
-		$htmlContent = self::inlineEmailStyles($htmlContent);
+		$htmlContent = self::inlineStyles($htmlContent);
 		// Output debug
 		if ( $debugRender ) {
 			return [
@@ -206,7 +206,7 @@ class TransactionnalEmails
 	 *
 	 * @return false|string
 	 */
-	static function inlineEmailStyles ( string $htmlContent ) {
+	static function inlineStyles ( string $htmlContent ) {
 		// Load document
 		$doc = new DOMDocument();
 		@$doc->loadHTML($htmlContent, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
@@ -252,7 +252,7 @@ class TransactionnalEmails
 				$otherString = "Unable to decode";
 			}
 		}
-		self::sendEmail($to, "error", [
+		self::send($to, "error", [
 			"scope" => $scope,
 			"code" => $error->getCode(),
 			"message" => $error->getMessage(),
