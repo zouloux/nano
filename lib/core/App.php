@@ -49,8 +49,8 @@ class App
 		return self::$__clientIP;
 	}
 
-	public static function getAbsolutePath ( string $subPath = "" ): string {
-		return self::getScheme().'://'.self::getHost().rtrim(self::getBase(), '/').'/'.ltrim($subPath, '/');
+	public static function getAbsolutePath ( string $subPath = "", bool $withBase = true ): string {
+		return self::getScheme().'://'.self::getHost().rtrim($withBase ? self::getBase() : '', '/').'/'.ltrim($subPath, '/');
 	}
 
 	public static function initHTTP ( ?string $base = null, bool $unstablePrependBaseToRoutes = false ): void {
