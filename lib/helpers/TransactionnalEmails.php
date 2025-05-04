@@ -3,6 +3,7 @@
 namespace Nano\helpers;
 
 use DOMDocument;
+use Nano\core\App;
 use Nano\core\Env;
 use Nano\core\Utils;
 use PHPMailer\PHPMailer\PHPMailer;
@@ -50,28 +51,27 @@ class TransactionnalEmails
 
 	static function init ( string $envPrefix = '' ) {
 		if ( isset(static::$__mailer) )
-			throw new Exception("EmailService::init // Already initialized");
+			throw new \Exception("EmailService::init // Already initialized");
 
 		$mailer = new PHPMailer(true);
 
 		$mailer->isSMTP();
 		$mailer->CharSet = PHPMailer::CHARSET_UTF8;
 		$mailer->SMTPAutoTLS = false;
-		$mailer->SMTPAuth = !empty(Env::get($envPrefix . 'MAIL_USERNAME')) && !empty(
-			Env::get(
-				$envPrefix . 'MAIL_PASSWORD'
-			)
-			);
-		$mailer->SMTPSecure = Env::get($envPrefix . 'MAIL_ENCRYPTION') ?? 'tls';
-		$mailer->Host = Env::get($envPrefix . 'MAIL_HOST');
-		$mailer->Port = intval(Env::get($envPrefix . 'MAIL_PORT') ?? "587");
-		$mailer->Username = Env::get($envPrefix . 'MAIL_USERNAME');
-		$mailer->Password = Env::get($envPrefix . 'MAIL_PASSWORD');
+		$mailer->SMTPAuth = (
+			!empty(Env::get($envPrefix.'MAIL_USERNAME'))
+			&& !empty(Env::get($envPrefix.'MAIL_PASSWORD' ))
+		);
+		$mailer->SMTPSecure = Env::get($envPrefix.'MAIL_ENCRYPTION') ?? 'tls';
+		$mailer->Host = Env::get($envPrefix.'MAIL_HOST');
+		$mailer->Port = intval(Env::get($envPrefix.'MAIL_PORT') ?? "587");
+		$mailer->Username = Env::get($envPrefix.'MAIL_USERNAME');
+		$mailer->Password = Env::get($envPrefix.'MAIL_PASSWORD');
 		//$senderEmail = Env::get($envPrefix.'MAIL_FROM_ADDRESS') ?? Env::get($envPrefix.'MAIL_USERNAME');
 		//$mailer->Sender = $senderEmail;
 		$mailer->setFrom(
-			Env::get($envPrefix . 'MAIL_FROM_ADDRESS') ?? Env::get($envPrefix . 'MAIL_USERNAME'),
-			Env::get($envPrefix . 'MAIL_FROM_NAME') ?? Env::get($envPrefix . 'MAIL_USERNAME')
+			Env::get($envPrefix.'MAIL_FROM_ADDRESS') ?? Env::get($envPrefix.'MAIL_USERNAME'),
+			Env::get($envPrefix.'MAIL_FROM_NAME') ?? Env::get($envPrefix.'MAIL_USERNAME')
 		);
 		$mailer->isHTML();
 
@@ -82,14 +82,14 @@ class TransactionnalEmails
 
 	static function send ( string $to, string $template, array $vars, bool $debugRender = false ) {
 		if ( !isset(static::$__mailer) || is_null(static::$__mailer) )
-			throw new Exception("EmailService::send // Not initialized");
+			throw new \Exception("EmailService::send // Not initialized");
 		$mailer = static::$__mailer;
 		// Load the template
 		$emailTemplatePath = self::$__templateBase ?? '';
-		$templateFile = $emailTemplatePath . $template . '.email.html';
+		$templateFile = $emailTemplatePath.$template.'.email.html';
 		$templateContent = file_get_contents($templateFile);
 		if ( $templateContent === false )
-			throw new Exception('EmailService::send // Unable to load the template file');
+			throw new \Exception('EmailService::send // Unable to load the template file');
 		// Split subject and inject in vars
 		$parts = explode("\n---\n", $templateContent, 2);
 		$subject = Utils::stache($parts[ 0 ], $vars);
@@ -98,7 +98,7 @@ class TransactionnalEmails
 		// Generate html layout
 		$htmlContent = Utils::nl2br($templateContent);
 		$layoutName = dirname($template);
-		$layoutPath = $emailTemplatePath . $layoutName . '.layout.html';
+		$layoutPath = $emailTemplatePath.$layoutName.'.layout.html';
 		if ( file_exists($layoutPath) ) {
 			$layoutTemplate = file_get_contents($layoutPath);
 			$htmlContent = Utils::stache($layoutTemplate, [
@@ -117,14 +117,14 @@ class TransactionnalEmails
 		if ( !empty(self::$__unsubscribeLink) ) {
 			$mailer->addCustomHeader("List-Unsubscribe", self::$__unsubscribeLink);
 			$vars = [ ...$vars, "unsubscribe" => self::$__unsubscribeLink ];
-			$textContent .= "\n\n---\n\nUnsubscribe: " . self::$__unsubscribeLink;
+			$textContent .= "\n\n---\n\nUnsubscribe: ".self::$__unsubscribeLink;
 		}
 		// Inject banner
 		if ( !empty(self::$__banner) ) {
 			// As var in html
 			$vars = [ ...$vars, "banner" => self::$__banner ];
 			// Append in text
-			$textContent = strip_tags(self::$__banner) . "\n\n---\n\n" . $textContent;
+			$textContent = strip_tags(self::$__banner)."\n\n---\n\n".$textContent;
 		} else {
 			$vars = [ ...$vars, "banner" => "" ];
 		}
@@ -133,10 +133,10 @@ class TransactionnalEmails
 			...$vars,
 			"logo" => (
 			implode('', [
-				'<a href="' . self::$__logoLink . '" class="logoLink">',
+				'<a href="'.self::$__logoLink.'" class="logoLink">',
 				empty(self::$__logoURL)
 					? self::$__brandName
-					: '<img class="logoImage" src="' . self::$__logoURL . '" alt="' . self::$__brandName . '" />',
+					: '<img class="logoImage" src="'.self::$__logoURL.'" alt="'.self::$__brandName.'" />',
 				'</a>',
 			])
 			),
@@ -153,11 +153,22 @@ class TransactionnalEmails
 		}
 		// Prepare the email
 		$mailer->addAddress($to);
-		$mailer->Subject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
+		$mailer->Subject = '=?UTF-8?B?'.base64_encode($subject).'?=';
 		$mailer->Body = $htmlContent;
 		$mailer->AltBody = $textContent;
 		// Send the email
-		$r = $mailer->send();
+		$emailSendDisable = Env::get('NANO_DISABLE_EMAIL_SEND', false);
+		if ( $emailSendDisable === "debug" ) {
+			App::stdout([
+				"name" => "EmailService::send",
+				"template" => $template,
+				"to" => $to,
+				"subject" => $subject,
+				"vars" => $vars,
+			]);
+		} else if ( $emailSendDisable === false ) {
+			$r = $mailer->send();
+		}
 		// Clear all recipients and attachments for next send
 		$mailer->clearAddresses();
 		$mailer->clearAttachments();
@@ -233,9 +244,9 @@ class TransactionnalEmails
 			foreach ( $elements as $element ) {
 				// Inline style
 				$existingStyle = $element->getAttribute('style');
-				$existingStyle = !empty($existingStyle) ? $existingStyle . ';' : '';
+				$existingStyle = !empty($existingStyle) ? $existingStyle.';' : '';
 				$element->removeAttribute('class');
-				$element->setAttribute('style', $existingStyle . trim($style));
+				$element->setAttribute('style', $existingStyle.trim($style));
 			}
 		}
 		// Remove the first style tag
@@ -244,12 +255,12 @@ class TransactionnalEmails
 	}
 
 
-	static function reportError ( string $to, string $scope, Exception $error, mixed $other = null ) {
+	static function reportError ( string $to, string $scope, \Exception $error, mixed $other = null ) {
 		$otherString = "";
 		if ( !is_null($other) ) {
 			try {
 				$otherString = json_encode($other, JSON_NUMERIC_CHECK);
-			} catch ( Exception $error ) {
+			} catch ( \Exception $error ) {
 				$otherString = "Unable to decode";
 			}
 		}
