@@ -304,8 +304,8 @@ class App
 	 */
 	static function stdout ( mixed $data ): void {
 		if ( !is_string( $data ) )
-			$data = json_encode($data);
-		fwrite(fopen('php://stdout', 'w'), $data);
+			$data = json_encode($data, JSON_PRETTY_PRINT);
+		fwrite(fopen('php://stdout', 'w'), $data."\n");
 	}
 
 	/**
@@ -315,8 +315,8 @@ class App
 	 */
 	static function stderr ( mixed $data ): void {
 		if ( !is_string( $data ) )
-			$data = json_encode($data);
-		error_log(json_encode($data));
+			$data = json_encode($data, JSON_PRETTY_PRINT);
+		error_log($data);
 	}
 
 	// --------------------------------------------------------------------------- ROBOTS / SITEMAP
