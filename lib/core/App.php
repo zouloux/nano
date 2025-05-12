@@ -213,12 +213,12 @@ class App
 			$p2 = [];
 			foreach ( $profiles as $key => $profile )
 				$p2[$key] = round(($profile[1] - $profile[0]) * 10000) / 10;
-			error_log(time()." - [".$log."] - ".json_encode($p2));
+			error_log(time()." - [".$log."] - ".json_encode($p2, JSON_NUMERIC_CHECK));
 		}
 		self::$__injectedProfile = [ $jsonKey => $profiles ];
 	}
 
-	static function json ( mixed $data, int $status = 200, $options = 0, $depth = 512, ?callable $then = null ): void {
+	static function json ( mixed $data, int $status = 200, $options = JSON_NUMERIC_CHECK, $depth = 512, ?callable $then = null ): void {
 		if ( is_array($data) && isset(self::$__injectedProfile) )
 			$data = [ ...$data, ...self::$__injectedProfile];
 		SimpleRouter::response()->httpCode( $status );
@@ -304,7 +304,7 @@ class App
 	 */
 	static function stdout ( mixed $data ): void {
 		if ( !is_string( $data ) )
-			$data = json_encode($data, JSON_PRETTY_PRINT);
+			$data = json_encode($data, JSON_PRETTY_PRINT & JSON_NUMERIC_CHECK);
 		fwrite(fopen('php://stdout', 'w'), $data."\n");
 	}
 
@@ -315,7 +315,7 @@ class App
 	 */
 	static function stderr ( mixed $data ): void {
 		if ( !is_string( $data ) )
-			$data = json_encode($data, JSON_PRETTY_PRINT);
+			$data = json_encode($data, JSON_PRETTY_PRINT & JSON_NUMERIC_CHECK);
 		error_log($data);
 	}
 
