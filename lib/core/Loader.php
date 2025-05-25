@@ -18,6 +18,7 @@ class Loader
 	 * Can also start at 01.
 	 * Will skip files and directories with name starting with an underscore. ex :
 	 * - _skipped.php
+	 * Will skip directories containing a .nanoexclude file
 	 */
 	public static function loadFunctions ( string $directory, array $exclude = [] ): void {
 		$files = scandir( $directory );
@@ -27,6 +28,8 @@ class Loader
 			if ( stripos( $file, '_' ) === 0 )
 				continue;
 			if ( in_array($file, $exclude) )
+				continue;
+			if ( file_exists($directory . '/.nanoexclude') )
 				continue;
 			$path = $directory.'/'.$file;
 			// Recursively load directories
