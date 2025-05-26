@@ -259,9 +259,14 @@ abstract class AbstractModel
 		}
 		// Apply exclusive filters
 		$exclusiveFilters = $options["exclusiveFilters"];
-		if ( !empty($exclusiveFilters) )
-			foreach ( $exclusiveFilters as $filter => $value )
-				$sqlQuery->where($filter, $value);
+		if ( !empty($exclusiveFilters) ) {
+			foreach ( $exclusiveFilters as $filter => $value ) {
+				if ( $value === "@not-null" )
+					$sqlQuery->whereNotNull($filter);
+				else
+					$sqlQuery->where($filter, $value);
+			}
+		}
 		// Get total count for pagination
 		$totalCount = $sqlQuery->count();
 		$totalPages = ceil($totalCount / $options["pageLength"]);
