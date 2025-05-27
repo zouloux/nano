@@ -227,9 +227,10 @@ abstract class AbstractModel
 	 * - orderDirection -> Ordering direction, default is "desc"
 	 *
 	 * @param array{searchQuery?: string, searchColumns?: string[], exclusiveFilters?: array<string, mixed>, searchExplode?:boolean, pageIndex?: int, pageLength?: int, orderBy?: string, orderDirection?: string} $options The configuration options for pagination and search.*
+	 * @param callable|null $customQuery Customer query with $sqlQuery as argument, useful for join filtering
 	 * @return array Returns an associative array with paginated results and pagination details.
 	 */
-	public static function paginate ( array $options = [] ) : array {
+	public static function paginate ( array $options = [], ?callable $customQuery = null ) : array {
 		// Merge default options with provided options
 		$options = [
 			"searchQuery" => "",
@@ -267,6 +268,9 @@ abstract class AbstractModel
 					$sqlQuery->where($filter, $value);
 			}
 		}
+		// Run custom query handler
+		if ( !is_null($customQuery) )
+			$customQuery($sqlQuery);
 		// Get total count for pagination
 		$totalCount = $sqlQuery->count();
 		$totalPages = ceil($totalCount / $options["pageLength"]);
