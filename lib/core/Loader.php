@@ -46,6 +46,8 @@ class Loader
 		}
 	}
 
+	// --------------------------------------------------------------------------- WORDPRESS
+
 	protected static bool $__wordpressLoaded = false;
 
 	/**
@@ -68,5 +70,66 @@ class Loader
 		require_once NANO_WORDPRESS_PATH.'/wp-load.php';
 		$profile();
 		return true;
+	}
+
+	protected static bool $__wordpressStarted = false;
+
+	/**
+	 * Start Wordpress and its theme rendering.
+	 * Cannot start Wordpress if already loaded.
+	 * @return bool
+	 * @throws Exception
+	 */
+	public static function startWordpress () {
+		if ( self::$__wordpressLoaded )
+			throw new Exception("Loader::startWordpress // Cannot start wordpress if it was already loaded.");
+		// Start only once, silently fail if already started
+		if ( self::$__wordpressStarted )
+			return false;
+		self::$__wordpressStarted = true;
+		// Need wordpress path
+		if ( !defined('NANO_WORDPRESS_PATH') )
+			throw new Exception("Loader::startWordpress // NANO_WORDPRESS_PATH not defined");
+		if ( !defined('WP_USE_THEMES') )
+			define( 'WP_USE_THEMES', false );
+		$profile = Debug::profile("Starting wordpress");
+		require_once NANO_WORDPRESS_PATH.'/index.php';
+		$profile();
+		return true;
+	}
+
+	/**
+	 * Will proxy all SimpleRouter requests to Wordpress REST API.
+	 * Usage : SimpleRouter::all("/base/wp-json/{path}", function ( $path ) { Loader::proxyWordpressWPJson( $path ); })
+	 * Use along bare_fields_feature_global_move_wp_json_origin if using WPS Bare Fields.
+	 * @param string $path
+	 * @return void
+	 * @throws Exception
+	 */
+	public static function proxyWordpressWPJson ( string $path ) {
+
+		self::loadWordpress();
+
+		$method = strtoupper( App::getRouterRequest()->getMethod() );
+		$fullPath = '/'.$path;
+		$bodyParameters = App::getRouterInput()->all();
+		$headers = getallheaders();
+
+		$request = new WP_REST_Request( $method, $fullPath );
+		$request->set_body_params( $bodyParameters );
+		$request->set_query_params( $_GET );
+		$request->set_headers( $headers );
+
+		$response = rest_do_request( $request );
+
+		if ( $response->is_error() ) {
+			$error = $response->as_error();
+			$errorData = $error->get_error_data();
+			App::stderr( $errorData );
+			$data = [ 'message' => $error->get_error_message() ];
+			App::json($data, $response->status ?? 500);
+		}
+
+		App::json( $response->get_data() );
 	}
 }
