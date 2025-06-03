@@ -100,7 +100,9 @@ class Loader
 
 	/**
 	 * Will proxy all SimpleRouter requests to Wordpress REST API.
-	 * Usage : SimpleRouter::all("/base/wp-json/{path}", function ( $path ) { Loader::proxyWordpressWPJson( $path ); })
+	 * Usage : SimpleRouter::all("/base/wp-json/{path}", function ( $path ) {
+	 * 	Loader::proxyWordpressWPJson( $path );
+	 * }, App::ROUTE_PARAMETER_WITH_SLASHES)
 	 * Use along bare_fields_feature_global_move_wp_json_origin if using WPS Bare Fields.
 	 * @param string $path
 	 * @return void
@@ -115,7 +117,7 @@ class Loader
 		$bodyParameters = App::getRouterInput()->all();
 		$headers = getallheaders();
 
-		$request = new WP_REST_Request( $method, $fullPath );
+		$request = new \WP_REST_Request( $method, $fullPath );
 		$request->set_body_params( $bodyParameters );
 		$request->set_query_params( $_GET );
 		$request->set_headers( $headers );
