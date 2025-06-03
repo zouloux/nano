@@ -90,8 +90,6 @@ class Loader
 		// Need wordpress path
 		if ( !defined('NANO_WORDPRESS_PATH') )
 			throw new Exception("Loader::startWordpress // NANO_WORDPRESS_PATH not defined");
-		if ( !defined('WP_USE_THEMES') )
-			define( 'WP_USE_THEMES', false );
 		$profile = Debug::profile("Starting wordpress");
 		require_once NANO_WORDPRESS_PATH.'/index.php';
 		$profile();
@@ -110,7 +108,7 @@ class Loader
 	 */
 	public static function proxyWordpressWPJson ( string $path ) {
 
-		self::loadWordpress();
+		self::startWordpress();
 
 		$method = strtoupper( App::getRouterRequest()->getMethod() );
 		$fullPath = '/'.$path;
