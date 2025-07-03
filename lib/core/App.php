@@ -347,6 +347,8 @@ class App
 			$lines[] = 'Disallow: '.$d;
 		if ( !empty($sitemap) ) {
       $lines[] = "";
+			if ( !str_starts_with($sitemap, "http") )
+				$sitemap = App::getAbsolutePath($sitemap);
 			$lines[] = "Sitemap: ".App::getAbsolutePath($sitemap);
     }
 		App::text( $lines );
