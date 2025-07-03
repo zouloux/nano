@@ -349,7 +349,7 @@ class App
       $lines[] = "";
 			if ( !str_starts_with($sitemap, "http") )
 				$sitemap = App::getAbsolutePath($sitemap);
-			$lines[] = "Sitemap: ".App::getAbsolutePath($sitemap);
+			$lines[] = "Sitemap: ".$sitemap;
     }
 		App::text( $lines );
 	}
