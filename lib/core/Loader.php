@@ -132,4 +132,13 @@ class Loader
 
 		App::json( $response->get_data() );
 	}
+
+	/**
+	 * Load CachedDocumentRequest class in WPS without having to load Wordpress.
+	 * It allows querying all WPS Documents with a cache.
+	 * @return void
+	 */
+	public static function loadWPSCachedDocumentRequest () {
+		require_once App::$rootPath."/public/mu-plugins/wps-bare-fields/nano/CachedDocumentRequest.php";
+	}
 }
