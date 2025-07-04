@@ -496,4 +496,21 @@ class App
     App::redirect($redirect);
     exit;
 	}
+
+	// --------------------------------------------------------------------------- MEMORY CACHE
+
+	protected static array $__memoryCache = [];
+
+	/**
+	 * Fast memory cache.
+	 * Avoid querying multiple times the same elements in the same php exec call.
+	 * @param string $key Key to store data
+	 * @param callable $callback Callback to retrieve data.
+	 * @return mixed
+	 */
+	static function memoryCache ( string $key, callable $callback ) {
+		if ( !isset(self::$__memoryCache[$key]) )
+			self::$__memoryCache[$key] = $callback();
+		return self::$__memoryCache[$key];
+	}
 }
