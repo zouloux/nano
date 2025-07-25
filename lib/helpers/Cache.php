@@ -18,12 +18,12 @@ class Cache {
 	 * @param string $key Unique key for this cache instance
 	 * @param string $cacheMethod Can be "apcu" / "file" / "none" or "auto" for "apcu" with "file" fallback
 	 * @param string|null $cachePath Absolute path for the "file" cache system
-	 * @param bool $anihilate All functions will work but nothing will be cached. Usefull to test in dev environment without cache.
+	 * @param bool $annihilate All functions will work, but nothing will be cached. Useful to test in a dev environment without a cache.
 	 * @return Cache
 	 * @throws Exception
 	 */
-	public static function createInstance (string $key, string $cacheMethod, ?string $cachePath = null, bool $anihilate = false): Cache {
-		$instance = new Cache($key, $cacheMethod, $cachePath, $anihilate);
+	public static function createInstance (string $key, string $cacheMethod, ?string $cachePath = null, bool $annihilate = false): Cache {
+		$instance = new Cache($key, $cacheMethod, $cachePath, $annihilate);
 		self::$__instances[$key] = $instance;
 		return $instance;
 	}
@@ -66,18 +66,18 @@ class Cache {
 	 * @param string $key Key of cache, will be used as cache prefix for namspaces
 	 * @param string $cacheMethod Can be "apcu" / "file" / "none" or "auto" for "apcu" with "file" fallback
 	 * @param string|null $cachePath Absolute path for the "file" cache system
-	 * @param bool $anihilate All functions will work but nothing will be cached. Usefull to test in dev environment without cache.
+	 * @param bool $annihilate All functions will work, but nothing will be cached. Useful to test in a dev environment without a cache.
 	 * @return void
 	 * @throws Exception
 	 */
-	public function __construct (string $key, string $cacheMethod, ?string $cachePath = null, bool $anihilate = false) {
+	public function __construct (string $key, string $cacheMethod, ?string $cachePath = null, bool $annihilate = false) {
 		$this->_key = $key;
-		if ($anihilate) {
-			App::stdout("[cache] '$key' anihilated.");
+		if ($annihilate) {
+//			App::stdout("[cache] '$key' anihilated.");
 			$this->_cacheMethod = "none";
 			return;
 		}
-		App::stdout("[cache] '$key' created with '$cacheMethod' method.");
+//		App::stdout("[cache] '$key' created with '$cacheMethod' method.");
 		// Check cache path directory
 		if (($cacheMethod === "file" || $cacheMethod === "auto") && (is_null($cachePath))) {
 			throw new \Exception("Cache::init // Invalid cache path $cachePath");
