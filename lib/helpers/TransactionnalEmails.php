@@ -118,6 +118,8 @@ class TransactionnalEmails
 		// Clear all recipients and attachments for next send
 		$mailer->clearAddresses();
 		$mailer->clearAttachments();
+		$mailer->clearCustomHeaders();
+		// todo : clear all ?
 		return $r;
 	}
 
@@ -214,6 +216,54 @@ class TransactionnalEmails
 			"templatePath" => $templatePath,
 			"vars" => $vars,
 		]);
+	}
+
+	// --------------------------------------------------------------------------- PROCESS ASSETS
+
+	public static function assetAsBase64 ( string $imagePath ) {
+		$emailTemplatePath = self::$__templateBase ?? '';
+		$path = $emailTemplatePath."assets/".$imagePath;
+	}
+
+	public static function generateEmailImageTag (string $method, string $publicImagePath, string $class = "") {
+		// Check if file exists in public directory
+		$filePath = App::$publicPath."/".$publicImagePath;
+		if ( !file_exists($filePath) )
+			throw new \Exception("EmailService::generateEmailImageTag // Image $publicImagePath does not exist in public directory.");
+		// Inject image as base64, only for testing in browser, GMail does not support this
+		if ( $method === "base64" ) {
+			$imageContent = file_get_contents($filePath);
+			$src = 'data:image/png;base64,'.base64_encode($imageContent);
+		}
+		// Use image from server
+		else if ( $method === "remote" ) {
+			$src = App::getAbsolutePath($publicImagePath);
+		}
+		// Use embedded image with attachments
+		else if ( $method === "embedded" ) {
+			$src = "cid:".self::addEmbeddedImage($filePath);
+		}
+		else {
+			throw new \Exception("EmailService::generateEmailImageTag // Invalid method $method");
+		}
+
+		return '<img src="'.$src.'" class="'.$class.'" />';
+	}
+
+	static function addEmbeddedImage ( string $imagePath ) {
+		$mailer = static::$__mailer;
+		$cid = uniqid();
+		$mailer->addEmbeddedImage($imagePath, $cid, basename($imagePath));
+		return $cid;
+	}
+
+	static function addAttachment ( string $assetPath ) {
+		$mailer = static::$__mailer;
+		$emailTemplatePath = self::$__templateBase ?? '';
+		$path = $emailTemplatePath."assets/".$assetPath;
+		$name = basename($path);
+		$mailer->addAttachment($path, $name);
+		return $name;
 	}
 
 	// --------------------------------------------------------------------------- PROCESS STRINGS
