@@ -11,7 +11,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 class TransactionnalEmails
 {
-	// ------------------------------------------------------------------------- BRAND
+	// --------------------------------------------------------------------------- BRAND
 
 	static protected string $__brandName;
 	static protected string $__logoURL;
@@ -29,7 +29,7 @@ class TransactionnalEmails
 		self::$__unsubscribeLink = $unsubscribeLink;
 	}
 
-	// ------------------------------------------------------------------------- BANNER
+	// --------------------------------------------------------------------------- BANNER
 
 	static protected string $__banner;
 
@@ -37,7 +37,7 @@ class TransactionnalEmails
 		self::$__banner = $banner;
 	}
 
-	// ------------------------------------------------------------------------- TEMPLATES
+	// --------------------------------------------------------------------------- TEMPLATES
 
 	static protected $__templateBase;
 
@@ -45,7 +45,11 @@ class TransactionnalEmails
 		self::$__templateBase = $templateBase;
 	}
 
-	// ------------------------------------------------------------------------- PHP MAILER INIT
+	static function getTemplateBase () {
+		return self::$__templateBase;
+	}
+
+	// --------------------------------------------------------------------------- PHP MAILER INIT
 
 	static protected PHPMailer $__mailer;
 
@@ -78,41 +82,95 @@ class TransactionnalEmails
 		self::$__mailer = $mailer;
 	}
 
-	// ------------------------------------------------------------------------- SEND EMAIL
+	// --------------------------------------------------------------------------- LOAD LAYOUT
 
-	static function send ( string $to, string $template, array $vars, bool $debugRender = false ) {
+	static function loadEmailLayout ( string $layoutName = "default", array $layoutVars = [] ) {
+		$layoutPath = self::$__templateBase.$layoutName.'.layout.html';
+		if ( !file_exists($layoutPath) )
+			return null;
+		$layoutContent = file_get_contents($layoutPath);
+		return Utils::stache($layoutContent, $layoutVars);
+	}
+
+	// --------------------------------------------------------------------------- SEND EMAIL
+
+	static function sendRawEmail ( string $to, string $subject, string $htmlContent, string $textContent, array $more = [] ) {
+		$mailer = static::$__mailer;
+		// Prepare the email
+		$mailer->addAddress($to);
+		$mailer->Subject = '=?UTF-8?B?'.base64_encode($subject).'?=';
+		$mailer->Body = $htmlContent;
+		$mailer->AltBody = $textContent;
+		// Send the email
+		$emailSendDisable = Env::get('NANO_DISABLE_EMAIL_SEND', false);
+		$r = false;
+		if ( $emailSendDisable === "debug" ) {
+			App::stdout([
+				"name" => "EmailService::send",
+				"template" => $more["templatePath"] ?? "-",
+				"vars" => $more["vars"] ?? "-",
+				"to" => $to,
+				"subject" => $subject,
+			]);
+		} else if ( $emailSendDisable === false ) {
+			$r = $mailer->send();
+		}
+		// Clear all recipients and attachments for next send
+		$mailer->clearAddresses();
+		$mailer->clearAttachments();
+		return $r;
+	}
+
+	/**
+	 * Send an email from a file template.
+	 * - Will load email layout from template base path with the layout name extracted from the template name.
+	 * - Will inline styles with TransactionnalEmails::inlineStyles()
+	 * - Will process HTML to text with TransactionnalEmails::processHTMLToText()
+	 * @param string $to Email address to send to.
+	 * @param string $templatePath Template path relative to the template base path.
+	 * @param array $vars Vars to replace in HTML.
+	 * @param bool $debugRender
+	 * @return mixed|string[]
+	 * @throws \PHPMailer\PHPMailer\Exception
+	 */
+	static function send ( string $to, string $templatePath, array $vars, bool $debugRender = false ) {
 		if ( !isset(static::$__mailer) || is_null(static::$__mailer) )
 			throw new \Exception("EmailService::send // Not initialized");
 		$mailer = static::$__mailer;
 		// Load the template
 		$emailTemplatePath = self::$__templateBase ?? '';
-		$templateFile = $emailTemplatePath.$template.'.email.html';
+		$templateFile = $emailTemplatePath.$templatePath.'.email.html';
 		$templateContent = file_get_contents($templateFile);
 		if ( $templateContent === false )
 			throw new \Exception('EmailService::send // Unable to load the template file');
-		// Split subject and inject in vars
-		$parts = explode("\n---\n", $templateContent, 2);
-		$subject = Utils::stache($parts[ 0 ], $vars);
-		$templateContent = $parts[ 1 ];
-		$vars = [ ...$vars, "subject" => $subject ];
+		// Split subject and inject in vars if marker is available
+		if ( strpos($templateContent, "\n---\n") !== false ) {
+			$parts = explode("\n---\n", $templateContent, 2);
+			$subject = Utils::stache($parts[ 0 ], $vars);
+			$templateContent = $parts[ 1 ];
+			$vars = [ ...$vars, "subject" => $subject ];
+		}
+		else {
+			$subject = $vars["subject"] ?? "";
+		}
 		// Generate html layout
 		$htmlContent = Utils::nl2br($templateContent);
-		$layoutName = dirname($template);
-		$layoutPath = $emailTemplatePath.$layoutName.'.layout.html';
-		if ( file_exists($layoutPath) ) {
-			$layoutTemplate = file_get_contents($layoutPath);
-			$htmlContent = Utils::stache($layoutTemplate, [
-				...$vars,
-				"content" => $htmlContent
-			]);
-		}
+		$layoutName = dirname($templatePath);
+		// Load layout from dirname of template
+		$layoutVars = [ ...$vars, "content" => $htmlContent ];
+		$layoutTemplate = self::loadEmailLayout($layoutName, $layoutVars);
+		// Try default layout if not found
+		if ( is_null($layoutTemplate) )
+			$layoutTemplate = self::loadEmailLayout("default", $layoutVars);
+		// Layout found
+		if ( !is_null($templatePath) )
+			$htmlContent = $layoutTemplate;
 		// Process the template with the variables for text email
-		$textContent = preg_replace('/<a href="(.*?)">(.*?)<\/a>/', '$2: $1', $templateContent);
+		$textContent = self::processHTMLToText( $templateContent );
 		$textContent = Utils::stache($textContent, [
 			...$vars,
 			"logo" => self::$__brandName
 		]);
-		$textContent = strip_tags($textContent);
 		// Unsubscribe link
 		if ( !empty(self::$__unsubscribeLink) ) {
 			$mailer->addCustomHeader("List-Unsubscribe", self::$__unsubscribeLink);
@@ -151,28 +209,35 @@ class TransactionnalEmails
 				"text" => $textContent,
 			];
 		}
-		// Prepare the email
-		$mailer->addAddress($to);
-		$mailer->Subject = '=?UTF-8?B?'.base64_encode($subject).'?=';
-		$mailer->Body = $htmlContent;
-		$mailer->AltBody = $textContent;
-		// Send the email
-		$emailSendDisable = Env::get('NANO_DISABLE_EMAIL_SEND', false);
-		if ( $emailSendDisable === "debug" ) {
-			App::stdout([
-				"name" => "EmailService::send",
-				"template" => $template,
-				"to" => $to,
-				"subject" => $subject,
-				"vars" => $vars,
-			]);
-		} else if ( $emailSendDisable === false ) {
-			$r = $mailer->send();
-		}
-		// Clear all recipients and attachments for next send
-		$mailer->clearAddresses();
-		$mailer->clearAttachments();
-		return $r;
+		//
+		return self::sendRawEmail($to, $subject, $htmlContent, $textContent, [
+			"templatePath" => $templatePath,
+			"vars" => $vars,
+		]);
+	}
+
+	// --------------------------------------------------------------------------- PROCESS STRINGS
+
+	/**
+	 * Process HTML template for text version.
+	 * Will replace links with the content and the href.
+	 * Will strip all html tags.
+	 * @param string $templateContent
+	 * @return string
+	 */
+	static function processHTMLToText ( string $templateContent ) {
+		$textContent = preg_replace('/<a href="(.*?)">(.*?)<\/a>/', '$2: $1', $templateContent);
+		$textContent = strip_tags($textContent);
+
+		// Remove tabs and replace any combination of \r\n, \r, \n with single newline
+		$textContent = preg_replace('/\t+/', '', $textContent);
+		$textContent = preg_replace('/[\r\n]+/', "\n", $textContent);
+
+		// Remove multiple consecutive newlines and keep only single newlines
+		$textContent = preg_replace('/\n{2,}/', "\n", $textContent);
+
+		// Trim whitespace from beginning and end
+		return trim($textContent);
 	}
 
 	/**
@@ -254,6 +319,7 @@ class TransactionnalEmails
 		return $doc->saveHTML();
 	}
 
+	// --------------------------------------------------------------------------- REPORTING
 
 	static function reportError ( string $to, string $scope, \Exception $error, mixed $other = null ) {
 		$otherString = "";
