@@ -266,6 +266,16 @@ class TransactionnalEmails
 		return $name;
 	}
 
+	// --------------------------------------------------------------------------- HTML TAGS
+
+	static function generateLinkTag (string $href, string $text, string $class = "" ) {
+		return '<a href="'.$href.'" class="'.$class.'">'.$text.'</a>';
+	}
+
+	static function generateParagraphTag (string $text, string $class = "" ) {
+		return '<p class="'.$class.'">'.$text.'</p>';
+	}
+
 	// --------------------------------------------------------------------------- PROCESS STRINGS
 
 	/**
@@ -276,7 +286,14 @@ class TransactionnalEmails
 	 * @return string
 	 */
 	static function processHTMLToText ( string $templateContent ) {
-		$textContent = preg_replace('/<a href="(.*?)">(.*?)<\/a>/', '$2: $1', $templateContent);
+		// Remove inline style attributes from all tags to avoid leftover style content
+		$templateContent = preg_replace('/\sstyle\s*=\s*"[^"]*"/i', '', $templateContent);
+		$templateContent = preg_replace("/\sstyle\s*=\s*'[^']*'/i", '', $templateContent);
+
+		// Also handle both quote types for href in anchor tags
+		$textContent = preg_replace('/<a href=[\"\'](.*?)=[\"\']>(.*?)<\/a>/', '$2: $1', $templateContent);
+		$textContent = preg_replace('/<a href=[\"\'](.*?)[\"\']>(.*?)<\/a>/', '$2: $1', $templateContent);
+
 		$textContent = strip_tags($textContent);
 
 		// Remove tabs and replace any combination of \r\n, \r, \n with single newline
@@ -289,7 +306,6 @@ class TransactionnalEmails
 		// Trim whitespace from beginning and end
 		return trim($textContent);
 	}
-
 	/**
 	 * Parse HTML buffer, replace all class calls and inline styles.
 	 * Uses DOMDocument PHP package.
