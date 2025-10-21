@@ -284,9 +284,15 @@ abstract class AbstractModel
 		// Convert and return with pagination options
 		return [
 			"list" => static::convertList($list),
-			"totalPages" => $totalPages,
-			"totalCount" => $totalCount,
-			"pageIndex" => $options["pageIndex"],
+			"pages" => [
+				"count" => $totalCount,
+				"total" => $totalPages,
+				"current" => $options["pageIndex"],
+			],
+			"order" => [
+				"orderBy" => $options["orderBy"],
+				"orderDirection" => $options["orderDirection"]
+			],
 		];
 	}
 
