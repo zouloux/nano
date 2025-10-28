@@ -139,7 +139,7 @@ class Cache {
 		else if ($this->_cacheMethod === "file") {
 			// Reset cache folder for file cache system
 			if (file_exists($this->_cachePath))
-				FileSystem::recursiveRemoveDirectory($this->_cachePath);
+				FileSystem::recursiveRemove($this->_cachePath);
 			$this->cacheInitDirectory();
 			return true;
 		}
