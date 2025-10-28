@@ -8,6 +8,8 @@ use Nano\debug\Debug;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 use Pecee\SimpleRouter\SimpleRouter;
+use Twig\TwigFilter;
+use Twig\TwigFunction;
 
 class TemplateRenderer {
 
@@ -28,15 +30,23 @@ class TemplateRenderer {
 		TwigHelpers::injectHelpers( self::$__environment );
 	}
 
-	// -------------------------------------------------------------------------
+	// --------------------------------------------------------------------------- EXTEND TWIG
 
-	public function getTwig ():Environment { return self::$__environment; }
+	public static function getTwig ():Environment { return self::$__environment; }
 
-	public function injectHelpers ( callable $handler ) {
+	public static function injectHelpers ( callable $handler ) {
 		$handler( self::$__environment );
 	}
 
-	// ------------------------------------------------------------------------- THEME VARS
+	public static function addTwigFilter (string $name, callable $filter ) {
+		self::$__environment->addFilter( new TwigFilter($name, $filter) );
+	}
+
+	public static function addTwigFunction (string $name, callable $function ) {
+		self::$__environment->addFunction( new TwigFunction($name, $function) );
+	}
+
+	// --------------------------------------------------------------------------- THEME VARS
 
 	// Theme variables, init first with empty array
 	protected static array $__themeVariables = [];
@@ -64,7 +74,7 @@ class TemplateRenderer {
 			Utils::dotSet( self::$__themeVariables, $key, $value );
 	}
 
-	// ------------------------------------------------------------------------- THEME HANDLERS
+	// --------------------------------------------------------------------------- THEME HANDLERS
 
 	protected static array $__themeHandlers = [];
 
@@ -79,7 +89,7 @@ class TemplateRenderer {
 		return $handlers[$name](...$arguments);
 	}
 
-	// ------------------------------------------------------------------------- CALLBACKS
+	// --------------------------------------------------------------------------- CALLBACKS
 
 	protected static array $__beforeViewHandlers = [];
 	protected static array $__processRenderStreamHandlers = [];
@@ -97,7 +107,7 @@ class TemplateRenderer {
 		self::$__processRenderStreamHandlers[] = $handler;
 	}
 
-	// ------------------------------------------------------------------------- RENDER
+	// --------------------------------------------------------------------------- RENDER
 
 	/**
 	 * Render a template to a string.
