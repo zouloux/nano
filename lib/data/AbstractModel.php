@@ -57,8 +57,15 @@ abstract class AbstractModel
 		foreach ($files as $file) {
 			if (!is_file("$modelsDirectory/$file") || pathinfo($file, PATHINFO_EXTENSION) !== 'php')
 				continue;
+			// Extract file name without extension
 			$name = pathinfo($file, PATHINFO_FILENAME);
-			$className = ucfirst(str_replace('.model', '', $name)) . 'Model';
+			// Replace the .model pre-extension if existing
+			$name = str_replace('.model', '', $name);
+			// Separate underscore and map to CamelCase
+			$parts = explode('_', $name);
+			$parts = array_map('ucfirst', $parts);
+			$className = implode('', $parts).'Model';
+			// form_usage.model.php -> FormUsageModel
 			echo "<br/>Model $name :<br/>";
 			if ( !class_exists($className) || !method_exists($className, 'migrate') ) {
 				echo "- Unable to load";
