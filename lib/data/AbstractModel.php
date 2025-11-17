@@ -26,7 +26,7 @@ use ReflectionProperty;
 
 abstract class AbstractModel
 {
-	// ------------------------------------------------------------------------- DB
+	// --------------------------------------------------------------------------- INIT & MIGRATE DB
 
 	public static function initDatabase ( string $sqlitePath, string $modelsDirectory, bool $migrate = false, bool $enableWAL = true ) : Capsule {
 		// Allow database file in migration phase only
@@ -82,7 +82,7 @@ abstract class AbstractModel
 		exit;
 	}
 
-	// -------------------------------------------------------------------------
+	// --------------------------------------------------------------------------- TABLE STRUCTURE & MIGRATION
 
 	const TABLE_NAME = "";
 
@@ -162,12 +162,39 @@ abstract class AbstractModel
 		static::afterUpgrade( $version );
 	}
 
+	// --------------------------------------------------------------------------- INTERNAL QUERY HELPERS
+
 	public static function table () : Builder {
 		return Capsule::table( static::TABLE_NAME );
 	}
 
-	// ------------------------------------------------------------------------- DEFAULT HELPERS
+	/**
+	 * @return static[]
+	 */
+	protected static function tableToList (
+		Builder $table,
+		string $orderBy = "updated_at", string $direction = "desc",
+		int $limit = -1, int $offset = 0
+	) : array {
+		$table->orderBy( $orderBy, $direction );
+		if ( $limit !== -1 )
+			$table->limit( $limit )->offset( $offset );
+		$list = $table->get();
+		return static::convertList( $list );
+	}
 
+	protected static function convertList ( $list ): array {
+		$output = [];
+		foreach ( $list as $item )
+			$output[] = new static( (array) $item );
+		return $output;
+	}
+
+	// --------------------------------------------------------------------------- QUERY HELPERS
+
+	public static function getByID ( int $id ) : static|null {
+		return static::getOneWhere( "id", $id );
+	}
 
 	public static function getOneWhere ( string $key, mixed $value ) : static|null {
 		$array = static::table()->where( $key, $value )->get()->first();
@@ -185,31 +212,40 @@ abstract class AbstractModel
 	/**
 	 * @return static[]
 	 */
-	public static function getAllWhere ( string $key, mixed $value, $orderBy = "updated_at", $direction = "desc" ) : array {
-		$list = static::table()->where( $key, $value )->orderBy( $orderBy, $direction )->get();
-		return static::convertList( $list );
-	}
-
-	protected static function convertList ( $list ): array {
-		$output = [];
-		foreach ( $list as $item )
-			$output[] = new static( (array) $item );
-		return $output;
-	}
-
-
-	public static function getByID ( int $id ) : static|null {
-		return static::getOneWhere( "id", $id );
+	public static function getAllWhere (
+		string $key, mixed $value,
+		string $orderBy = "updated_at", string $direction = "desc",
+		int $limit = -1, int $offset = 0
+	) : array {
+		$table = static::table()->where( $key, $value );
+		return self::tableToList( $table, $orderBy, $direction, $limit, $offset );
 	}
 
 	/**
 	 * @return static[]
 	 */
-	public static function getAll ( $orderBy = "updated_at", $direction = "desc" ) : array {
-		$list = static::table()->orderBy( $orderBy, $direction )->get();
-		return static::convertList( $list );
+	public static function getAllWhereMultiple (
+		array $where,
+		string $orderBy = "updated_at", string $direction = "desc",
+		int $limit = -1, int $offset = 0
+	) : array {
+		$table = static::table();
+		foreach ( $where as $key => $value )
+			$table = $table->where( $key, $value );
+		return self::tableToList( $table, $orderBy, $direction, $limit, $offset );
 	}
 
+	/**
+	 * @return static[]
+	 */
+	public static function getAll (
+		string $orderBy = "updated_at", string $direction = "desc",
+		int $limit = -1, int $offset = 0
+	) : array {
+		return self::tableToList( static::table(), $orderBy, $direction, $limit, $offset );
+	}
+
+	// --------------------------------------------------------------------------- PAGINATE QUERY
 
 	/**
 	 * Paginate through results with optional search and filters.
@@ -303,7 +339,7 @@ abstract class AbstractModel
 		];
 	}
 
-	// -------------------------------------------------------------------------
+	// ---------------------------------------------------------------------------
 
 	protected static $propertyTypesCache = [];
 
@@ -331,14 +367,14 @@ abstract class AbstractModel
 		return $propertyNames;
 	}
 
-	// ------------------------------------------------------------------------- CONSTRUCTOR
+	// --------------------------------------------------------------------------- CONSTRUCTOR
 
 	public function __construct ( ?array $from = null ) {
 		if ( ! is_null( $from ) )
 			$this->inject( $from );
 	}
 
-	// ------------------------------------------------------------------------- ARRAY <=> OBJECT
+	// --------------------------------------------------------------------------- ARRAY <=> OBJECT
 
 	public function inject ( array $data ) : void {
 		$properties = static::listValueObjectProperties();
@@ -371,13 +407,13 @@ abstract class AbstractModel
 		}
 	}
 
-	// ------------------------------------------------------------------------- COMMON VALUE OBJECT PROPERTIES
+	// --------------------------------------------------------------------------- COMMON VALUE OBJECT PROPERTIES
 
 	public int $id;
 	public int $created_at;
 	public int $updated_at;
 
-	// ------------------------------------------------------------------------- SAVE
+	// --------------------------------------------------------------------------- SAVE
 
 	public function toArray ( $forDB = false ): array {
 		$properties = static::listValueObjectProperties();
