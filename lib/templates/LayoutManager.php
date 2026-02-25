@@ -85,6 +85,7 @@ class LayoutManager
 		self::overrideMetaKey( $metaData, "shareTitle" );
 		self::overrideMetaKey( $metaData, "shareDescription" );
 		self::overrideMetaKey( $metaData, "shareImage" );
+		self::overrideMetaKey( $metaData, "robots" );
 	}
 
 	protected static function overrideMetaKey ( $metaData, $key ) {
@@ -212,6 +213,9 @@ class LayoutManager
 		// --- CHARSET
 		if ( self::$__charset )
 			$buffer[] = "<meta charset=\"".htmlspecialchars(self::$__charset)."\" />";
+		// --- ROBOTS
+		if ( !empty(self::$__metaData["robots"]) )
+			$buffer[] = "<meta name=\"robots\" content=\"".htmlspecialchars(implode(",", self::$__metaData["robots"]))."\" />";
 		// --- VIEWPORT
 		if ( self::$__viewport )
 			$buffer[] = "<meta name=\"viewport\" content=\"".htmlspecialchars(self::$__viewport)."\" />";
