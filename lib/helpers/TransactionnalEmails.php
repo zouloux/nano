@@ -94,13 +94,15 @@ class TransactionnalEmails
 
 	// --------------------------------------------------------------------------- SEND EMAIL
 
-	static function sendRawEmail ( string $to, string $subject, string $htmlContent, string $textContent, array $more = [] ) {
+	static function sendRawEmail ( string $to, string $subject, string $htmlContent, string $textContent, array $more = [], ?array $replyTo = null ) {
 		$mailer = static::$__mailer;
 		// Prepare the email
 		$mailer->addAddress($to);
 		$mailer->Subject = '=?UTF-8?B?'.base64_encode($subject).'?=';
 		$mailer->Body = $htmlContent;
 		$mailer->AltBody = $textContent;
+		if (!is_null($replyTo))
+			$mailer->addReplyTo($replyTo[0], $replyTo[1]);
 		// Send the email
 		$emailSendDisable = Env::get('NANO_DISABLE_EMAIL_SEND', false);
 		$r = false;
