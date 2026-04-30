@@ -195,7 +195,8 @@ class TwigHelpers
 		// --------------------------------------------------------------------- WP IMAGES
 		function browseCompatibleFormats ( $formats, $filter = null ) {
 			// Check if browser supports webp
-			$supportsWebP = str_contains($_SERVER[ 'HTTP_ACCEPT' ], 'image/webp');
+			$acceptHeader = $_SERVER['HTTP_ACCEPT'] ?? '';
+			$supportsWebP = str_contains($acceptHeader, 'image/webp');
 			// If it supports webp but the format set has no webp, disable webp filtering
 			if ( $supportsWebP ) {
 				$hasWebP = false;
