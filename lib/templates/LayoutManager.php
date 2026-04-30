@@ -385,7 +385,7 @@ class LayoutManager
         $scriptManifest = $manifest[$viteMainScript];
 				self::addScriptFile($scriptLocation, $assetsPath.$scriptManifest["file"]."?".$cacheBusterSuffix, true, true);
         // Check if this js module generated css files and load them
-        if ( is_array($scriptManifest["css"]) )
+				if ( isset($scriptManifest["css"]) && is_array($scriptManifest["css"]) )
           foreach ( $scriptManifest["css"] as $cssFile )
             self::addStyleFile($styleLocation, $assetsPath.$cssFile."?".$cacheBusterSuffix);
 				// Get legacy entry points
