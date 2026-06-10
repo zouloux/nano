@@ -3,7 +3,7 @@
 	"description": "Nanoscopic PHP Framework.",
 	"license": "MIT",
 	"type": "framework",
-	"version": "2.10.7",
+	"version": "2.11.0",
 	"keywords": [
 		"framework",
 		"php"
@@ -27,6 +27,6 @@
 		"cocur/slugify": "^v4.5.1",
 		"symfony/var-dumper": "^v7.1.2",
 		"vlucas/phpdotenv": "^v5.6.0",
-		"pecee/simple-router": "^5.4.1"
+		"zouloux/simple-php-router": "^5.4.1"
 	}
 }
