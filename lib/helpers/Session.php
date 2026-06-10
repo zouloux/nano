@@ -20,7 +20,7 @@ class Session
 	 * @param int|null $sessionDuration Duration of the session and the cookie in seconds.
 	 * @return void
 	 */
-	public static function start ( int $sessionDuration = null ) {
+	public static function start ( ?int $sessionDuration = null ) {
 		if ( self::$__started )
 			return;
 		self::$__started = true;
